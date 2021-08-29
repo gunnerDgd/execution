@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <tuple>
 
 namespace executor    {
 namespace environment {
@@ -23,36 +24,28 @@ namespace environment {
         pthread_exit(0);
     }
 
-    template <typename Launcher>
     class thread
     {
     public:
-        using executor_handle   = std::tuple<pthread_t, void*>;
-        using executor_launcher = Launcher;
-
-#define THREAD_GET_HANDLE(handle)   std::get<0>(handle)
-#define THREAD_GET_ARGUMENT(handle) std::get<1>(handle)
+        using executor_handle = pthread_t;
 
     public:
         template <typename Fp, typename... Farg>
-        static executor_handle start_execution  (Fp exec_function, Farg... exec_argument);
-        static void            end_execution    (execution_handle& exec)                 { pthread_cancel(exec); delete THREAD_GET_ARGUMENT(exec); }
+        static executor_handle start_execution  (executor_handle& exec_prev, Fp exec_function, Farg... exec_argument);
+        static void            end_execution    (executor_handle& exec)                 { pthread_cancel(exec); }
         
-        static void            wait_execution   (execution_handle& exec)                 { pthread_join(THREAD_GET_HANDLE(exec)); }
+        static void            wait_execution   (executor_handle& exec)                 { pthread_join(exec, nullptr); }
+        static void            capture_execution(executor_handle& exec)                 { exec = pthread_self(); }
     };
 }
 }
 
 template <typename Fp, typename... Farg>
-executor::environment::thread::executor_handle executor::environment::thread::start_execution(Fp exec_function, Farg... exec_argument)
+typename executor::environment::thread::executor_handle executor::environment::thread::start_execution(executor_handle& exec_prev, Fp exec_function, Farg... exec_argument)
 {
-    executor::environment::thread::executor_handle thread_handle;
-    THREAD_GET_ARGUMENT(thread_handle)           = new thread_start_argument<Fp, Farg...>(exec_function, exec_argument...);
-
-    int       thread_res   = pthread_create(&std::get<0>(thread_handle)        ,
-                                            nullptr                            ,
-                                            thread_start_wrapper<Fp, Farg...>  ,
-                                            THREAD_GET_ARGUMENT(thread_handle));
-
+    executor_handle                    thread_handle  ;
+    thread_start_argument<Fp, Farg...> thread_argument(exec_function, exec_argument...);
+    
+    int       thread_res             = pthread_create(thread_handle, nullptr, thread_start_wrapper<Fp, Farg...>, (void*)&thread_argument);
     return    thread_handle;
 }

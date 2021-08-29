@@ -42,7 +42,14 @@ namespace context {
         stopped
     };
 
-    class execution_wrapper : public context_entity 
+    template <typename Fp, typename... Args>
+    struct execution_argument
+    {
+        Fp                  exec_function;
+        std::tuple<Args...> exec_argument;
+    };
+
+    /*class execution_wrapper : public context_entity 
     {
     public:
         execution_state get_state () { return executor_state; }
@@ -50,6 +57,10 @@ namespace context {
 
     protected:
         execution_state executor_state;
-    };
+    };*/
+
+    /*
+    Execution Wrapper Object Will be Obsolete...
+    */
 }
 }
