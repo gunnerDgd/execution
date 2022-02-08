@@ -17,27 +17,26 @@ namespace execution {
 
 	public:
 		template <typename ExecType, typename... ExecArgs>
-		basic_execution_branch (this_type&, ExecType&&, ExecArgs&&...);
-		basic_execution_branch ()									  {  }
+		basic_execution_branch (ExecType&&, ExecArgs&&...);
 		~basic_execution_branch();
 
 	public:
-		void operator()() { branch_trait::switch_to(__M_branch_parent.__M_branch_context, __M_branch_context); }
+		void operator()() { branch_trait::switch_to(__M_branch_context, __M_branch_context_pairred); }
 
 	private:
-		branch_context __M_branch_context;
+		branch_context __M_branch_context,		   // Current Branch Information.
+					   __M_branch_context_pairred; // Executed Branch Information
 		branch_handle  __M_branch_handle ;
-		this_type&	   __M_branch_parent ;
 
 	};
 }
 
 template <typename BranchContext, typename BranchTrait, typename BranchHandle>
 template <typename ExecType, typename... ExecArgs>
-execution::basic_execution_branch<BranchContext, BranchTrait, BranchHandle>::basic_execution_branch(this_type& prev, ExecType&& exec, ExecArgs&&... args) : __M_branch_parent(prev),
-																																						    __M_branch_handle(prev, __M_branch_context)
+execution::basic_execution_branch<BranchContext, BranchTrait, BranchHandle>::basic_execution_branch(ExecType&& exec, ExecArgs&&... args) : __M_branch_context_pairred(4096 * 4),
+																																		   __M_branch_handle		 (__M_branch_context, __M_branch_context_pairred)
 {
-	auto exec_pack = branch_trait::to_pack   (__M_branch_context, prev.__M_branch_context, exec, __M_branch_handle, std::forward<ExecArgs>(args)...);
+	auto exec_pack = branch_trait::to_pack   (__M_branch_context, __M_branch_context_pairred, exec, __M_branch_handle, std::forward<ExecArgs>(args)...);
 					 branch_trait::execute_at(exec_pack);
 }
 
@@ -47,5 +46,5 @@ execution::basic_execution_branch<BranchContext, BranchTrait, BranchHandle>::~ba
 	typename branch_handle::status status(__M_branch_handle);
 	
 	while (status != branch_handle::status::execution_state::ended)
-		branch_trait::switch_to(__M_branch_parent.__M_branch_context, __M_branch_context);
+		branch_trait::switch_to(__M_branch_context, __M_branch_context_pairred);
 }
