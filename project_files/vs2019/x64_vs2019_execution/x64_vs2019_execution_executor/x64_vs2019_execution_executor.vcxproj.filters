@@ -36,5 +36,8 @@
     <ClInclude Include="..\..\..\..\include\execution\executor_traits\forward.hpp">
       <Filter>Header Files\executor_traits</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\execution\executor_traits\container\std_list.hpp">
+      <Filter>Header Files\container</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -19,6 +19,9 @@ namespace execution {
 		execution_handle execute      (ExecType&&, ExecArgs&&...);
 		state_type		 execute_state(execution_handle&);
 		suspended_handle suspend	  (execution_handle&);
+		
+		void			 run		  ()				 { __M_executor_traits.current()(); }
+		void			 run_next     ()				 { __M_executor_traits.next   ()(); }
 
 	private:
 		traits_type __M_executor_traits;

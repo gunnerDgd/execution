@@ -26,7 +26,7 @@ namespace execution::queueing {
 
 	public:
 		template <typename InputType>
-		iterator_type enqueue   (InputType&&)				 requires std::is_same_v<std::decay_t<InputType>, block_type>;
+		iterator_type enqueue   (InputType&&)				  requires std::is_same_v<std::decay_t<InputType>, block_type>;
 		template <typename InputType>
 		iterator_type enqueue_at(InputType&&, iterator_type&) requires std::is_same_v<std::decay_t<InputType>, block_type>;
 		void		  dequeue	(iterator_type&);
@@ -49,6 +49,17 @@ namespace execution::queueing {
 		using value_type		= typename ringed_list<BlockType, BlockAllocator>::block_type	  ;
 		using pointer			= typename ringed_list<BlockType, BlockAllocator>::block_pointer  ;
 		using reference		    = typename ringed_list<BlockType, BlockAllocator>::block_reference;
+
+	public:
+		rlist_iterator(wrapper_type*    init) : __M_iterator_wrapper(init)						{  }
+		rlist_iterator()					  : __M_iterator_wrapper(nullptr)					{  }
+		
+		rlist_iterator(rlist_iterator&  copy) : __M_iterator_wrapper(copy.__M_iterator_wrapper) {  }
+		rlist_iterator(rlist_iterator&& move) : __M_iterator_wrapper(move.__M_iterator_wrapper) {  }
+
+		rlist_iterator& operator=    (rlist_iterator& );
+		rlist_iterator& operator=    (rlist_iterator&&);
+					    operator bool()				   { return (__M_iterator_wrapper != nullptr); }
 
 	public:
 		reference		operator* ();
@@ -86,16 +97,10 @@ namespace execution::queueing {
 using namespace execution::queueing;
 
 template <typename BlockType, typename BlockAllocator>
-ringed_list<BlockType, BlockAllocator>::ringed_list ()
-{
-	
-}
+ringed_list<BlockType, BlockAllocator>::ringed_list () { }
 
 template <typename BlockType, typename BlockAllocator>
-ringed_list<BlockType, BlockAllocator>::~ringed_list()
-{
-
-}
+ringed_list<BlockType, BlockAllocator>::~ringed_list() { }
 
 template <typename BlockType, typename BlockAllocator>
 ringed_list<BlockType, BlockAllocator>::rlist_iterator::reference ringed_list<BlockType, BlockAllocator>::rlist_iterator::operator* ()
@@ -123,27 +128,51 @@ bool			ringed_list<BlockType, BlockAllocator>::rlist_iterator::operator!=(rlist_
 }
 
 template <typename BlockType, typename BlockAllocator>
+ringed_list<BlockType, BlockAllocator>::rlist_iterator& ringed_list<BlockType, BlockAllocator>::rlist_iterator::operator=(rlist_iterator& copy)
+{
+	__M_iterator_wrapper = copy.__M_iterator_wrapper;
+	return *this;
+}
+
+template <typename BlockType, typename BlockAllocator>
+ringed_list<BlockType, BlockAllocator>::rlist_iterator& ringed_list<BlockType, BlockAllocator>::rlist_iterator::operator=(rlist_iterator&& move)
+{
+	__M_iterator_wrapper = move.__M_iterator_wrapper;
+	return *this;
+}
+
+
+template <typename BlockType, typename BlockAllocator>
 template <typename InputType>
-ringed_list<BlockType, BlockAllocator>::iterator_type ringed_list<BlockType, BlockAllocator>::enqueue   (InputType&& input)					   requires std::is_same_v<std::decay_t<InputType>, block_type>
+ringed_list<BlockType, BlockAllocator>::iterator_type ringed_list<BlockType, BlockAllocator>::enqueue(InputType&& input) requires std::is_same_v<std::decay_t<InputType>, block_type>
 {
 	rlist_wrapper* input_wrapper       = new rlist_wrapper;
-	input_wrapper->__M_wrapper_context = __M_rlist_allocator.allocate(1); std::construct_at(input_wrapper->__M_wrapper_context, input);
+				   input_wrapper->__M_wrapper_context = new block_type { input };
 	
+	if (__M_rlist_begin && __M_rlist_end)
+	{
+		__M_rlist_end  ->__M_wrapper_next = input_wrapper;
+		__M_rlist_begin->__M_wrapper_prev = input_wrapper;
+		__M_rlist_end					  = input_wrapper;
+	}
+	else
+	{
+		__M_rlist_begin = input_wrapper;
+		__M_rlist_end   = input_wrapper;
+	}
+
 	input_wrapper->__M_wrapper_prev	   = __M_rlist_end;
 	input_wrapper->__M_wrapper_next	   = __M_rlist_begin;
 
-	__M_rlist_end  ->__M_wrapper_next  = input_wrapper;
-	__M_rlist_begin->__M_wrapper_prev  = input_wrapper;
-
-	iterator_type input_iterator;
-				  input_iterator.__M_iterator_wrapper = input_wrapper;
-
-	return		  input_iterator;
+	return iterator_type(input_wrapper);
 }
 
 template <typename BlockType, typename BlockAllocator>
 void ringed_list<BlockType, BlockAllocator>::dequeue(iterator_type& pos)
 {
+	if (!__M_rlist_begin && !__M_rlist_end)
+		return;
+
 	pos.__M_iterator_wrapper->__M_wrapper_prev->__M_wrapper_next = pos.__M_iterator_wrapper->__M_wrapper_next;
 	pos.__M_iterator_wrapper->__M_wrapper_next->__M_wrapper_prev = pos.__M_iterator_wrapper->__M_wrapper_prev;
 
@@ -154,8 +183,18 @@ void ringed_list<BlockType, BlockAllocator>::dequeue(iterator_type& pos)
 template <typename BlockType, typename BlockAllocator>
 ringed_list<BlockType, BlockAllocator>::iterator_type ringed_list<BlockType, BlockAllocator>::migrate(iterator_type& hnd, this_type& queue)
 {
-	hnd.__M_iterator_wrapper->__M_wrapper_prev->__M_wrapper_next = hnd.__M_iterator_wrapper->__M_wrapper_next;
-	hnd.__M_iterator_wrapper->__M_wrapper_next->__M_wrapper_prev = hnd.__M_iterator_wrapper->__M_wrapper_prev;
+	if (hnd.__M_iterator_wrapper->__M_wrapper_prev == hnd.__M_iterator_wrapper->__M_wrapper_next)
+	{
+		auto new_pos = hnd.__M_iterator_wrapper->__M_wrapper_prev;
+		
+		new_pos->__M_wrapper_prev = new_pos;
+		new_pos->__M_wrapper_next = new_pos;
+	}
+	else
+	{
+		hnd.__M_iterator_wrapper->__M_wrapper_prev->__M_wrapper_next = hnd.__M_iterator_wrapper->__M_wrapper_next;
+		hnd.__M_iterator_wrapper->__M_wrapper_next->__M_wrapper_prev = hnd.__M_iterator_wrapper->__M_wrapper_prev;
+	}
 
 	return queue.enqueue(*hnd.__M_iterator_wrapper->__M_wrapper_context);
 }
@@ -165,29 +204,25 @@ template <typename InputType>
 ringed_list<BlockType, BlockAllocator>::iterator_type ringed_list<BlockType, BlockAllocator>::enqueue_at(InputType&& input, iterator_type& pos) requires std::is_same_v<std::decay_t<InputType>, block_type>
 {
 	rlist_wrapper* input_wrapper       = new rlist_wrapper;
-	input_wrapper->__M_wrapper_context = __M_rlist_allocator.allocate(1); std::construct_at(input_wrapper->__M_wrapper_context, input);
+	input_wrapper->__M_wrapper_context = new block_type   ; 
 
 	input_wrapper->__M_wrapper_prev	   = pos.__M_iterator_wrapper;
 	input_wrapper->__M_wrapper_next    = pos.__M_iterator_wrapper->__M_wrapper_next;
 
 	pos.__M_iterator_wrapper->__M_wrapper_next->__M_wrapper_prev = input_wrapper;
 	pos.__M_iterator_wrapper->__M_wrapper_next					 = input_wrapper;
+
+	return iterator_type(input_wrapper);
 }
 
 template <typename BlockType, typename BlockAllocator>
 ringed_list<BlockType, BlockAllocator>::iterator_type ringed_list<BlockType, BlockAllocator>::begin()
 {
-	rlist_iterator b_iterator;
-				   b_iterator.__M_iterator_wrapper = __M_rlist_begin; 
-
-	return		   b_iterator;
+	return rlist_iterator(__M_rlist_begin);
 }
 
 template <typename BlockType, typename BlockAllocator>
 ringed_list<BlockType, BlockAllocator>::iterator_type ringed_list<BlockType, BlockAllocator>::end  ()
 {
-	rlist_iterator e_iterator;
-				   e_iterator.__M_iterator_wrapper = __M_rlist_end; 
-
-	return		   e_iterator;
+	return rlist_iterator(__M_rlist_end);
 }

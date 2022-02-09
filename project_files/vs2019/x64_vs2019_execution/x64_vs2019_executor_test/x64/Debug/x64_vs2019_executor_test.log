@@ -1,2 +1,53 @@
 ﻿  Test.cpp
-  x64_vs2019_executor_test.vcxproj -> C:\Users\ifstu\Projects\execution\project_files\vs2019\x64_vs2019_execution\x64\Debug\x64_vs2019_executor_test.exe
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(59,40): error C3772: 'execution::executor_traits<execution::branch,T>': invalid friend template declaration
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(72): message : see reference to class template instantiation 'execution::executor_traits<execution::branch,ExecutorQueue>::running' being compiled
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(80,40): error C3772: 'execution::executor_traits<execution::branch,T>': invalid friend template declaration
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(93): message : see reference to class template instantiation 'execution::executor_traits<execution::branch,ExecutorQueue>::suspended' being compiled
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(98,1): error C2350: 'execution::executor_traits<execution::branch,ExecutorQueue>::start' is not a static member
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(98): message : see declaration of 'execution::executor_traits<execution::branch,ExecutorQueue>::start'
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(98,1): error C2513: 'execution::executor_traits<execution::branch,ExecutorQueue>::start': no variable declared before '='
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(98,146): error C2065: 'suspended_branch': undeclared identifier
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(98,164): error C2065: 'suspended': undeclared identifier
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(99,1): error C2447: '{': missing function header (old-style formal list?)
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(136,57): error C2760: syntax error: unexpected token '{', expected ';'
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(29,35): error C2039: 'iterator': is not a member of 'execution::queueing::std_list<execution::branch>'
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\forward.hpp(8): message : see declaration of 'execution::queueing::std_list<execution::branch>'
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(13): message : see reference to class template instantiation 'execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>' being compiled
+C:\Users\ifstu\Projects\execution\project_files\vs2019\x64_vs2019_execution\x64_vs2019_executor_test\Test.cpp(26): message : see reference to class template instantiation 'execution::basic_executor<execution::branch,execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>>' being compiled
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(29,44): error C3646: 'queue_iterator': unknown override specifier
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(29,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(44,18): error C3646: '__M_traits_iterator': unknown override specifier
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\executor_traits.hpp(44,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(13,36): error C2039: 'running_branch': is not a member of 'execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>'
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\forward.hpp(8): message : see declaration of 'execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>'
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(13,53): error C3646: 'execution_handle': unknown override specifier
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(13,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(14,36): error C2039: 'suspended_branch': is not a member of 'execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>'
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\forward.hpp(8): message : see declaration of 'execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>'
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(14,53): error C3646: 'suspended_handle': unknown override specifier
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(14,1): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(19,20): error C2061: syntax error: identifier 'execute'
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(19,1): error C2238: unexpected token(s) preceding ';'
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(20,30): error C2061: syntax error: identifier 'execution_handle'
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(21,20): error C3646: 'suspend': unknown override specifier
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(21,30): error C2988: unrecognizable template declaration/definition
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(21,30): error C2059: syntax error: '('
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(21,1): error C2238: unexpected token(s) preceding ';'
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(23,1): error C3927: '->': trailing return type is not allowed after a non-function declarator
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(23,46): error C3484: syntax error: expected '->' before the return type
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(23,47): error C3613: missing return type after '->' ('int' assumed)
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(23,47): error C3646: 'current': unknown override specifier
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(23,54): error C2988: unrecognizable template declaration/definition
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(23,54): error C2059: syntax error: '('
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(23,1): error C2238: unexpected token(s) preceding ';'
+C:\Users\ifstu\Projects\execution\include\execution\basic_executor.hpp(24,3): error C2144: syntax error: 'void' should be preceded by ';'
+C:\Users\ifstu\Projects\execution\project_files\vs2019\x64_vs2019_execution\x64_vs2019_executor_test\Test.cpp(26): error C2672: 'execution::basic_executor<execution::branch,execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>>::{ctor}': no matching overloaded function found
+C:\Users\ifstu\Projects\execution\project_files\vs2019\x64_vs2019_execution\x64_vs2019_executor_test\Test.cpp(27,23): error C2039: 'execute': is not a member of 'execution::basic_executor<execution::branch,execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>>'
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\forward.hpp(8): message : see declaration of 'execution::basic_executor<execution::branch,execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>>'
+C:\Users\ifstu\Projects\execution\project_files\vs2019\x64_vs2019_execution\x64_vs2019_executor_test\Test.cpp(28,23): error C2039: 'execute': is not a member of 'execution::basic_executor<execution::branch,execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>>'
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\forward.hpp(8): message : see declaration of 'execution::basic_executor<execution::branch,execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>>'
+C:\Users\ifstu\Projects\execution\project_files\vs2019\x64_vs2019_execution\x64_vs2019_executor_test\Test.cpp(31,66): error C2039: 'run_next': is not a member of 'execution::basic_executor<execution::branch,execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>>'
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\forward.hpp(8): message : see declaration of 'execution::basic_executor<execution::branch,execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>>'
+C:\Users\ifstu\Projects\execution\project_files\vs2019\x64_vs2019_execution\x64_vs2019_executor_test\Test.cpp(33,11): error C2039: 'suspend': is not a member of 'execution::basic_executor<execution::branch,execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>>'
+C:\Users\ifstu\Projects\execution\include\execution\executor_traits\forward.hpp(8): message : see declaration of 'execution::basic_executor<execution::branch,execution::executor_traits<execution::branch,execution::queueing::std_list<execution::branch>>>'
+C:\Users\ifstu\Projects\execution\project_files\vs2019\x64_vs2019_execution\x64_vs2019_executor_test\Test.cpp(33,23): error C3536: 'tst2': cannot be used before it is initialized

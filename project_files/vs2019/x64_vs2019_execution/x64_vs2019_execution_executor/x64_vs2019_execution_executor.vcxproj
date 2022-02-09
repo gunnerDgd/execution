@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\execution\basic_executor.hpp" />
     <ClInclude Include="..\..\..\..\include\execution\executor_traits\container\ringed_list.hpp" />
+    <ClInclude Include="..\..\..\..\include\execution\executor_traits\container\std_list.hpp" />
     <ClInclude Include="..\..\..\..\include\execution\executor_traits\executor_traits.hpp" />
     <ClInclude Include="..\..\..\..\include\execution\executor_traits\executor_trigger.hpp" />
     <ClInclude Include="..\..\..\..\include\execution\executor_traits\forward.hpp" />
