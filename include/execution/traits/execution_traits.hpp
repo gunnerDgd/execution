@@ -81,7 +81,7 @@ execution::execution_traits<context::context>::execution_pack<ExecType, ExecHand
 
 template <typename ExecType, typename ExecHandle>
 execution::execution_traits<context::context>::execution_pack<ExecType, ExecHandle>::execution_pack(context::context& prev, context::context& curr, handle_type& hnd, execution_type exec)
-	: __M_pack_handle(hnd),
+	: __M_pack_handle(hnd) ,
 	  __M_pack_prev  (prev),
 	  __M_pack_curr  (curr),
 	  __M_pack_exec  (exec) {  }

@@ -15,4 +15,10 @@ int main()
 {
 	std::string		  TestString;
 	execution::branch TestBranch(test, TestString);
+	
+	std::cout << "Hello Main #1\n";
+	TestBranch();
+	std::cout << TestString << std::endl;
+	std::cout << "Hello Main #2\n";
+	TestBranch();
 }

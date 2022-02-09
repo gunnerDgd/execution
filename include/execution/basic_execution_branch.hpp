@@ -13,7 +13,8 @@ namespace execution {
 		typedef		     BranchHandle													  branch_handle ;
 		typedef			 BranchContext													  branch_context;
 		typedef			 BranchTrait													  branch_trait  ;
-		typedef			 basic_execution_branch<BranchContext, BranchTrait, BranchHandle> this_type;
+		typedef			 basic_execution_branch<BranchContext, BranchTrait, BranchHandle> this_type     ;
+		typedef			 this_type::branch_handle::status								  status_type	;
 
 	public:
 		template <typename ExecType, typename... ExecArgs>
@@ -21,7 +22,8 @@ namespace execution {
 		~basic_execution_branch();
 
 	public:
-		void operator()() { branch_trait::switch_to(__M_branch_context, __M_branch_context_pairred); }
+		void		operator()() {		  branch_trait ::switch_to(__M_branch_context, __M_branch_context_pairred); }
+		status_type state	  () { return branch_handle::status	  (__M_branch_handle); }
 
 	private:
 		branch_context __M_branch_context,		   // Current Branch Information.
