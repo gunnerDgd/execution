@@ -62,6 +62,7 @@ namespace execution {
 		typedef traits_type::handle_type					   handle_type;
 
 		running(handle_type hnd) : __M_rq_handle(hnd) {  }
+		running()									  {  }
 
 	private:
 		handle_type __M_rq_handle;
@@ -78,6 +79,7 @@ namespace execution {
 		typedef traits_type::handle_type					   handle_type;
 
 		suspended(handle_type hnd)  : __M_sq_handle(hnd) {  }
+		suspended()										 {  }
 
 	private:
 		handle_type __M_sq_handle;
@@ -94,6 +96,10 @@ execution::executor_traits<ExecutorBranch, ExecutorQueue>::running execution::ex
 template <typename ExecutorBranch, typename ExecutorQueue>
 execution::executor_traits<ExecutorBranch, ExecutorQueue>::suspended execution::executor_traits<ExecutorBranch, ExecutorQueue>::suspend(running& rq)
 {
+	if (rq.__M_rq_handle == __M_traits_rq_current)
+		return suspended();
+		rq.__M_rq_handle = __M_traits_rq.end();
+
 	suspended   sq_handle = suspended(__M_traits_rq.migrate(rq.__M_rq_handle, __M_traits_sq));
 	onSuspended(sq_handle);
 
