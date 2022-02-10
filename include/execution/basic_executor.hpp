@@ -1,6 +1,7 @@
 #pragma once
 #include <utility>
 #include <type_traits>
+#include <execution/trigger/trigger.hpp>
 
 namespace execution {
 	template <typename ExecutorBranch, typename ExecutorTraits>
@@ -16,12 +17,17 @@ namespace execution {
 	public:
 		template <typename ExecType, typename... ExecArgs>
 		running    dispatch(ExecType&&, ExecArgs&&...);
-		suspended  suspend (running&);
+		suspended  suspend (running&)  ;
 		running    resume  (suspended&);
 		void	   execute ();
 
+	public:
+		template <typename Trigger, typename TriggerAction>
+		void      trigger_if(TriggerAction&& act) { __M_executor_traits.register_trigger<Trigger>(act); }
+
 	private:
-		traits_type __M_executor_traits;
+		traits_type __M_executor_traits ;
+		running*	__M_executor_current;
 	};
 }
 
