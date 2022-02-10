@@ -7,21 +7,18 @@ namespace execution {
 	class basic_executor
 	{
 	public:
-		typedef			 ExecutorBranch			          branch_type;
-		typedef			 ExecutorTraits				      traits_type;
+		typedef			 ExecutorBranch			    branch_type;
+		typedef			 ExecutorTraits				traits_type;
 		
-		typedef typename ExecutorTraits::running_branch   execution_handle;
-		typedef typename ExecutorTraits::suspended_branch suspended_handle;
-		typedef typename ExecutorTraits::state_type       state_type ; // State of the Execution.
+		typedef typename ExecutorTraits::running    running;
+		typedef typename ExecutorTraits::suspended  suspended;
 
 	public:
 		template <typename ExecType, typename... ExecArgs>
-		execution_handle execute      (ExecType&&, ExecArgs&&...);
-		state_type		 execute_state(execution_handle&);
-		suspended_handle suspend	  (execution_handle&);
-		
-		void			 run		  ()				 { __M_executor_traits.current()(); }
-		void			 run_next     ()				 { __M_executor_traits.next   ()(); }
+		running    dispatch(ExecType&&, ExecArgs&&...);
+		suspended  suspend (running&);
+		running    resume  (suspended&);
+		void	   execute ();
 
 	private:
 		traits_type __M_executor_traits;
@@ -30,22 +27,28 @@ namespace execution {
 
 template <typename ExecutorBranch, typename ExecutorTraits>
 template <typename ExecType, typename... ExecArgs>
-execution::basic_executor<ExecutorBranch, ExecutorTraits>::execution_handle
-	execution::basic_executor<ExecutorBranch, ExecutorTraits>::execute(ExecType&& exec, ExecArgs&&... args)
+execution::basic_executor<ExecutorBranch, ExecutorTraits>::running
+	execution::basic_executor<ExecutorBranch, ExecutorTraits>::dispatch(ExecType&& exec, ExecArgs&&... args)
 {
-	return __M_executor_traits.start(exec, std::forward<ExecArgs>(args)...);
+	return __M_executor_traits.dispatch(exec, std::forward<ExecArgs>(args)...);
 }
 
 template <typename ExecutorBranch, typename ExecutorTraits>
-execution::basic_executor<ExecutorBranch, ExecutorTraits>::suspended_handle
-	execution::basic_executor<ExecutorBranch, ExecutorTraits>::suspend(execution_handle& exec)
+execution::basic_executor<ExecutorBranch, ExecutorTraits>::suspended
+	execution::basic_executor<ExecutorBranch, ExecutorTraits>::suspend(running& exec)
 {
 	return __M_executor_traits.suspend(exec);
 }
 
 template <typename ExecutorBranch, typename ExecutorTraits>
-execution::basic_executor<ExecutorBranch, ExecutorTraits>::state_type  
-	execution::basic_executor<ExecutorBranch, ExecutorTraits>::execute_state(execution_handle& hnd)
+execution::basic_executor<ExecutorBranch, ExecutorTraits>::running
+	execution::basic_executor<ExecutorBranch, ExecutorTraits>::resume(suspended& exec)
 {
-	return hnd.state();
+	return __M_executor_traits.resume(exec);
+}
+
+template <typename ExecutorBranch, typename ExecutorTraits>
+void execution::basic_executor<ExecutorBranch, ExecutorTraits>::execute()
+{
+	__M_executor_traits.execute();
 }

@@ -1,145 +1,85 @@
 #pragma once
-#include <execution/executor_traits/container/ringed_list.hpp>
 #include <execution/forward.hpp>
 
 #include <mutex>
-
-#define EXECUTION_LOCK_QUEUE(lock, name) std::lock_guard<std::mutex> name(lock);
+#include <iostream>
 
 namespace execution {
 	template <typename ExecutorBranch, typename ExecutorQueue>
-	class executor_traits;
-
-	template <typename ExecutorQueue>
-	class executor_traits<branch, ExecutorQueue>
+	class executor_traits
 	{
 	public:
-		typedef branch						  branch_type	  ;
-		typedef branch*						  branch_pointer  ;
-		typedef branch&						  branch_reference;
+		typedef			 std::remove_pointer_t<ExecutorBranch> branch_type;
+		typedef			 ExecutorQueue::queue_type			   queue_type ;
+		typedef typename ExecutorQueue::queue_iterator		   handle_type;
 
-		typedef std::mutex					  lock_type  ;
-		typedef branch::branch_handle::status state_type ;
+		class			 running  ;
+		class			 suspended;
 
-		class running;
-		class suspended;
-
-	private:
-		typedef			 ExecutorQueue			 queue_type;
-		typedef typename ExecutorQueue::iterator queue_iterator;
+	public:
+		executor_traits () : __M_traits_rq_current(__M_traits_rq.begin()) {  }
+		~executor_traits()												  {  }
 
 	public:
 		template <typename ExecType, typename... ExecArgs>
-		running   start  (ExecType&&, ExecArgs&&...);
-		running   start  (suspended&);
-
-		void	  end    (running&);
-		void	  end    (suspended&);
-
-		suspended suspend(running&);
-
-		branch_reference current()				   { return (__M_traits_iterator) ? **__M_traits_iterator     : **(__M_traits_iterator = __M_traits_queue.begin()); }
-		branch_reference next   ()				   { return (__M_traits_iterator) ? **(++__M_traits_iterator) : **(__M_traits_iterator = __M_traits_queue.begin()); }
-	private:
-		queue_iterator __M_traits_iterator  ;
-		queue_type	   __M_traits_queue     ;
-		lock_type	   __M_traits_queue_lock;
+		running   dispatch(ExecType&&, ExecArgs&&...);
+		suspended suspend (running&);
+		running   resume  (suspended&);
+		void      execute ();
 
 	private:
-		queue_type     __M_traits_suspend_queue;
-		lock_type	   __M_traits_suspend_queue_lock;
+		queue_type  __M_traits_rq, __M_traits_sq;
+		handle_type __M_traits_rq_current;
 	};
 
-	template <typename ExecutorQueue>
-	class executor_traits<branch, ExecutorQueue>::running
+	template <typename ExecutorBranch, typename ExecutorQueue>
+	class executor_traits<ExecutorBranch, ExecutorQueue>::running
 	{
-		template <typename T, typename U>
-		friend class basic_executor;
-		template <typename T>
-		friend class executor_traits<branch, T>;
+		friend class executor_traits<ExecutorBranch, ExecutorQueue>;
 
-		using queue_type     = typename executor_traits<branch, ExecutorQueue>::queue_type	  ;
-		using queue_iterator = typename executor_traits<branch, ExecutorQueue>::queue_iterator;
-		using status		 = typename branch::branch_handle::status;
+		typedef executor_traits<ExecutorBranch, ExecutorQueue> traits_type;
+		typedef traits_type::handle_type					   handle_type;
 
-		running(queue_iterator br) : __M_handle_branch(br){  }
-
-	public:
-		status state() { return (**__M_handle_branch).state(); }
-
+		running(handle_type hnd) : __M_rq_handle(hnd) {  }
 	private:
-		queue_iterator __M_handle_branch;
+		handle_type __M_rq_handle;
 	};
-
-	template <typename ExecutorQueue>
-	class executor_traits<branch, ExecutorQueue>::suspended
-	{
-		template <typename T, typename U>
-		friend class basic_executor;
-		template <typename T>
-		friend class executor_traits<branch, T>;
-
-		using queue_type     = typename executor_traits<branch, ExecutorQueue>::queue_type	  ;
-		using queue_iterator = typename executor_traits<branch, ExecutorQueue>::queue_iterator;
-		using status		 = typename branch::branch_handle::status;
-
-		suspended(queue_iterator br) : __M_handle_branch(br) {  }
-
-	public:
-		status state() { (**__M_handle_branch).state(); }
-
-	private:
-		queue_iterator __M_handle_branch;
-	};
-
-}
-
-template <typename ExecutorQueue>
-execution::executor_traits<execution::branch, ExecutorQueue>::running execution::executor_traits<execution::branch, ExecutorQueue>::start(suspended& suspended)
-{
-	if (!suspended.__M_handle_branch) return running_branch { queue_iterator{} };
-
-	EXECUTION_LOCK_QUEUE (__M_traits_queue_lock		   , rq_lock)
-	EXECUTION_LOCK_QUEUE (__M_traits_suspend_queue_lock, sq_lock)
-
-	queue_iterator s_it = suspended.__M_handle_branch;
-						  suspended.__M_handle_branch = queue_iterator();
 	
-	return running_branch(__M_traits_suspend_queue.migrate(s_it, __M_traits_queue));
+	template <typename ExecutorBranch, typename ExecutorQueue>
+	class executor_traits<ExecutorBranch, ExecutorQueue>::suspended
+	{
+		friend class executor_traits<ExecutorBranch, ExecutorQueue>;
+
+		typedef executor_traits<ExecutorBranch, ExecutorQueue> traits_type;
+		typedef traits_type::handle_type					   handle_type;
+
+		suspended(handle_type hnd) : __M_sq_handle(hnd) {  }
+	private:
+		handle_type __M_sq_handle;
+	};
 }
 
-template <typename ExecutorQueue>
+template <typename ExecutorBranch, typename ExecutorQueue>
 template <typename ExecType, typename... ExecArgs>
-execution::executor_traits<execution::branch, ExecutorQueue>::running execution::executor_traits<execution::branch, ExecutorQueue>::start(ExecType&& exec, ExecArgs&&... args)
+execution::executor_traits<ExecutorBranch, ExecutorQueue>::running execution::executor_traits<ExecutorBranch, ExecutorQueue>::dispatch(ExecType&& exec, ExecArgs&&... args)
 {
-	EXECUTION_LOCK_QUEUE (__M_traits_queue_lock, rq_lock)
-	return running_branch(__M_traits_queue.enqueue(new branch(exec, std::forward<ExecArgs>(args)...)));
+	return running(__M_traits_rq.enqueue(new branch(exec, std::forward<ExecArgs>(args)...)));
 }
 
-template <typename ExecutorQueue>
-void execution::executor_traits<execution::branch, ExecutorQueue>::end(running& hnd)
+template <typename ExecutorBranch, typename ExecutorQueue>
+execution::executor_traits<ExecutorBranch, ExecutorQueue>::suspended execution::executor_traits<ExecutorBranch, ExecutorQueue>::suspend(running& rq)
 {
-	EXECUTION_LOCK_QUEUE(__M_traits_queue_lock, rq_lock)
-						 __M_traits_queue.dequeue(hnd.__M_handle_branch);
+	return suspended(__M_traits_rq.migrate(rq.__M_rq_handle, __M_traits_sq));
 }
 
-template <typename ExecutorQueue>
-void execution::executor_traits<execution::branch, ExecutorQueue>::end(suspended& hnd)
+template <typename ExecutorBranch, typename ExecutorQueue>
+execution::executor_traits<ExecutorBranch, ExecutorQueue>::running execution::executor_traits<ExecutorBranch, ExecutorQueue>::resume(suspended& sq)
 {
-	EXECUTION_LOCK_QUEUE(__M_traits_suspend_queue_lock, sq_lock)
-						 __M_traits_suspend_queue.dequeue(hnd.__M_handle_branch);
+	return running(__M_traits_sq.migrate(sq.__M_sq_handle, __M_traits_rq));
 }
 
-template <typename ExecutorQueue>
-execution::executor_traits<execution::branch, ExecutorQueue>::suspended execution::executor_traits<execution::branch, ExecutorQueue>::suspend(running& running)
+template <typename ExecutorBranch, typename ExecutorQueue>
+void execution::executor_traits<ExecutorBranch, ExecutorQueue>::execute()
 {
-	if (!running.__M_handle_branch) return suspended_branch{ queue_iterator{} };
-
-	EXECUTION_LOCK_QUEUE   (__M_traits_queue_lock		 , rq_lock)
-	EXECUTION_LOCK_QUEUE   (__M_traits_suspend_queue_lock, sq_lock)
-	
-	queue_iterator r_it = running.__M_handle_branch;
-					      running.__M_handle_branch = queue_iterator();
-						  
-	return suspended_handle(__M_traits_queue.migrate(r_it, __M_traits_suspend_queue));
+	(*++__M_traits_rq_current)();
 }
