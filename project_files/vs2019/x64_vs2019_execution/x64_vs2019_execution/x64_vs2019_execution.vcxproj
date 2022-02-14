@@ -22,6 +22,7 @@
     <ClInclude Include="..\..\..\..\include\execution\basic_execution_branch.hpp" />
     <ClInclude Include="..\..\..\..\include\execution\execution_handle\basic_execution_handle.hpp" />
     <ClInclude Include="..\..\..\..\include\execution\branch.hpp" />
+    <ClInclude Include="..\..\..\..\include\execution\execution_status.hpp" />
     <ClInclude Include="..\..\..\..\include\execution\trait_type.hpp" />
     <ClInclude Include="..\..\..\..\include\execution\traits\execution_traits.hpp" />
   </ItemGroup>

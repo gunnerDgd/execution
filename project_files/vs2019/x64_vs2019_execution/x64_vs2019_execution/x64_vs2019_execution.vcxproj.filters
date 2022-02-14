@@ -33,5 +33,8 @@
     <ClInclude Include="..\..\..\..\include\execution\branch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\execution\execution_status.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

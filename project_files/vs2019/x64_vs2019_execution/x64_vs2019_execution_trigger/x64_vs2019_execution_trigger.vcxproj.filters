@@ -21,5 +21,8 @@
     <ClInclude Include="..\..\..\..\include\execution\trigger\trigger.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\execution\trigger\basic_trigger.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

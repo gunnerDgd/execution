@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\include\execution\trigger\basic_trigger.hpp" />
     <ClInclude Include="..\..\..\..\include\execution\trigger\category.hpp" />
     <ClInclude Include="..\..\..\..\include\execution\trigger\trigger.hpp" />
   </ItemGroup>

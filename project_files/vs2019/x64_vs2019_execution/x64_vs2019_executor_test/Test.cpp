@@ -1,45 +1,58 @@
-#include <execution/branch.hpp>
-#include <execution/executor.hpp>
-
-#include <Windows.h>
 #include <iostream>
-#include <thread>
+#include <type_traits>
 
-void test(execution::branch::branch_handle& hnd, std::string& msg)
-{
-	while(true)
-	{
-		Sleep(1000);
-		hnd.yield();
-	}
-}
+#define TRIGGER_STATIC(type)		  static constexpr type
+#define TRIGGER_REDEFINE(type, alias) typedef type alias;
+#define TRIGGER_USING(type, alias) using alias = type;
 
-void test2(execution::branch::branch_handle& hnd, std::string& msg)
+template <std::size_t TriggerId, typename TriggerAction, typename... RemainingAction>
+class basic_trigger : public basic_trigger<TriggerId + 1, RemainingAction...>
 {
-	while (true)
-	{
-		Sleep(1000);
-		hnd.yield();
-	}
-}
+public:
+	TRIGGER_STATIC(std::size_t) id = TriggerId;
+	TRIGGER_REDEFINE(TriggerAction, action_type)
+
+public:
+	template <typename... ExecArgs>
+	void operator()(ExecArgs&&... args) { __M_trigger_action(std::forward<ExecArgs>(args)...) }
+
+private:
+	action_type __M_trigger_action;
+};
+
+template <std::size_t TriggerId, typename TriggerAction>
+class basic_trigger<TriggerId, TriggerAction>
+{
+public:
+	TRIGGER_STATIC(std::size_t) id = TriggerId;
+	TRIGGER_REDEFINE(TriggerAction, action_type)
+
+public:
+	template <typename... ExecArgs>
+	void operator()(ExecArgs&&... args) { __M_trigger_action(std::forward<ExecArgs>(args)...) }
+
+private:
+	action_type __M_trigger_action;
+};
+
+template <typename... TriggerAction>
+class trigger_set
+{
+public:
+	typedef basic_trigger<0, TriggerAction...> trigger_type;
+	
+
+private:
+	trigger_type __M_trigger_set;
+};
+
+template <std::size_t N>
+struct __helper_get
+{
+	static constexpr 
+};
 
 int main()
 {
-	execution::executor Executor;
 
-	std::string msg_test  = "Hello Test\n";
-	std::string msg_test2 = "Hello Test2\n";
-
-	auto rq_test      = Executor.dispatch([](execution::branch::branch_handle& h, std::string msg){ test(h, msg); } , msg_test);
-	auto rq_test2     = Executor.dispatch(std::bind(test2, std::placeholders::_1, msg_test2));
-
-	Executor.trigger_if<execution::trigger::executed>([](execution::executor::running)					 { std::cout << "Hello "; });
-	Executor.trigger_if<execution::trigger::yielded>([&Executor, &rq_test](execution::executor::running) { Executor.suspend(rq_test); });
-
-	std::thread ExecuteThread([&Executor]()
-		{
-			while (true)
-				Executor.execute();
-		});
-	ExecuteThread.join();
 }

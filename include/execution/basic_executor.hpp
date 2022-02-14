@@ -1,8 +1,8 @@
 #pragma once
-#include <utility>
 #include <type_traits>
-#include <execution/trigger/trigger.hpp>
+#include <execution/trigger/category.hpp>
 
+#define EXECUTOR_RUN_TRIGGER(trig, args) if(trig) trig(args); 
 namespace execution {
 	template <typename ExecutorBranch, typename ExecutorTraits>
 	class basic_executor
@@ -22,12 +22,22 @@ namespace execution {
 		void	   execute ();
 
 	public:
-		template <typename Trigger, typename TriggerAction>
-		void      trigger_if(TriggerAction&& act) { __M_executor_traits.register_trigger<Trigger>(act); }
+		template <typename Trigger, typename Action>
+		void trigger_if(Trigger&&, Action&&) {  }
+
+		template <typename Trigger, typename Action>
+		void trigger_if(Trigger&&, Action&&) requires std::is_same_v<std::decay_t<Trigger>, trigger::on_resumed>  ;
+
+		template <typename Trigger, typename Action>
+		void trigger_if(Trigger&&, Action&&) requires std::is_same_v<std::decay_t<Trigger>, trigger::on_suspended>;
 
 	private:
 		traits_type __M_executor_traits ;
 		running*	__M_executor_current;
+
+	private:
+		std::function<void(running&)>   __M_executor_onResumed  ;
+		std::function<void(suspended&)> __M_executor_onSuspended;
 	};
 }
 
@@ -43,18 +53,38 @@ template <typename ExecutorBranch, typename ExecutorTraits>
 execution::basic_executor<ExecutorBranch, ExecutorTraits>::suspended
 	execution::basic_executor<ExecutorBranch, ExecutorTraits>::suspend(running& exec)
 {
-	return __M_executor_traits.suspend(exec);
+	auto   hnd_suspend = __M_executor_traits.suspend	 (exec);
+	EXECUTOR_RUN_TRIGGER(__M_executor_onSuspended, hnd_suspend);
+						 
+	return hnd_suspend;
 }
 
 template <typename ExecutorBranch, typename ExecutorTraits>
 execution::basic_executor<ExecutorBranch, ExecutorTraits>::running
 	execution::basic_executor<ExecutorBranch, ExecutorTraits>::resume(suspended& exec)
 {
-	return __M_executor_traits.resume(exec);
+	auto   hnd_resume =  __M_executor_traits.resume   (exec);
+	EXECUTOR_RUN_TRIGGER(__M_executor_onResumed, hnd_resume);
+
+	return hnd_resume;
 }
 
 template <typename ExecutorBranch, typename ExecutorTraits>
 void execution::basic_executor<ExecutorBranch, ExecutorTraits>::execute()
 {
 	__M_executor_traits.execute();
+}
+
+template <typename ExecutorBranch, typename ExecutorTraits>
+template <typename Trigger, typename Action>
+void execution::basic_executor<ExecutorBranch, ExecutorTraits>::trigger_if(Trigger&&, Action&& action) requires std::is_same_v<std::decay_t<Trigger>, trigger::on_resumed>
+{
+	__M_executor_onResumed = action;
+}
+
+template <typename ExecutorBranch, typename ExecutorTraits>
+template <typename Trigger, typename Action>
+void execution::basic_executor<ExecutorBranch, ExecutorTraits>::trigger_if(Trigger&&, Action&& action) requires std::is_same_v<std::decay_t<Trigger>, trigger::on_suspended>
+{
+	__M_executor_onSuspended = action;
 }
