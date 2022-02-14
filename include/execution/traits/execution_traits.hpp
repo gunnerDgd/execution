@@ -30,7 +30,7 @@ namespace execution {
 		template <typename ExecHandle, typename... PackType>
 		static void execute_at(execution_pack<PackType...>*);
 		template <typename ExecHandle, typename... PackType>
-		static void execute_at(execution_pack<PackType...>*) requires (sizeof...(PackType) == 2);
+		static void execute_at(execution_pack<PackType...>*) requires (sizeof...(PackType) == 1);
 		static void switch_to (context::context&, context::context&);
 	};
 
@@ -85,13 +85,13 @@ execution::execution_traits<context::context>::execution_pack<ExecType>::executi
 template <typename ExecType, typename... ExecArgs>
 auto execution::execution_traits<context::context>::to_pack(context::context& prev, context::context& curr, execution_state& state, ExecType&& exec, ExecArgs&&... args) requires (sizeof...(ExecArgs) > 0)
 {
-	return new execution_pack<ExecType, ExecArgs...>(prev, curr, exec, std::tuple<ExecArgs...>(args...));
+	return new execution_pack<ExecType, ExecArgs...>(prev, curr, state, exec, std::tuple<ExecArgs...>(args...));
 }
 
 template <typename ExecType>
 auto execution::execution_traits<context::context>::to_pack(context::context& prev, context::context& curr, execution_state& state, ExecType&& exec)
 {
-	return new execution_pack<ExecType>(prev, curr, exec);
+	return new execution_pack<ExecType>(prev, curr, state, exec);
 }
 
 template <typename ExecHandle, typename... PackType>
@@ -115,7 +115,7 @@ void execution::execution_traits<context::context>::execute_at(execution_pack<Pa
 }
 
 template <typename ExecHandle, typename... PackType>
-void execution::execution_traits<context::context>::execute_at(execution_pack<PackType...>* pack) requires (sizeof...(PackType) == 2)
+void execution::execution_traits<context::context>::execute_at(execution_pack<PackType...>* pack) requires (sizeof...(PackType) == 1)
 {
 	context::context::execute_at(pack->__M_pack_prev, pack->__M_pack_curr, [](void* pack_ptr) 
 	{

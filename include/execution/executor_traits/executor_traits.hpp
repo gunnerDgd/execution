@@ -1,8 +1,8 @@
 #pragma once
 #include <execution/trigger/category.hpp>
-#include <functional>
+#include <execution/execution_type.hpp>
 
-#include <mutex>
+#include <functional>
 #include <iostream>
 
 namespace execution {
@@ -26,11 +26,14 @@ namespace execution {
 	public:
 		template <typename ExecType, typename... ExecArgs>
 		running   dispatch(ExecType&&, ExecArgs&&...);
+		template <typename DispatchType, typename ExecType, typename... ExecArgs>
+		running   dispatch(DispatchType&&, running&, ExecType&&, ExecArgs&&...);
+
 		suspended suspend (running&)				 ;
 		running   resume  (suspended&)				 ;
 		
 		void      execute ()						 ;
-		running   current ()						 { return running(__M_traits_rq_current); }
+		running   current ()						 ;
 	
 	private:
 		queue_type  __M_traits_rq, __M_traits_sq;
@@ -74,20 +77,34 @@ execution::executor_traits<ExecutorBranch, ExecutorQueue>::running execution::ex
 }
 
 template <typename ExecutorBranch, typename ExecutorQueue>
+template <typename DispatchType, typename ExecType, typename... ExecArgs>
+execution::executor_traits<ExecutorBranch, ExecutorQueue>::running execution::executor_traits<ExecutorBranch, ExecutorQueue>::dispatch(DispatchType&& type, running& hnd, ExecType&& exec, ExecArgs&&... args)
+{
+	return running(__M_traits_rq.enqueue(type, hnd.__M_rq_handle, new branch(exec, std::forward<ExecArgs>(args)...)));
+}
+
+template <typename ExecutorBranch, typename ExecutorQueue>
 execution::executor_traits<ExecutorBranch, ExecutorQueue>::suspended execution::executor_traits<ExecutorBranch, ExecutorQueue>::suspend(running& rq)
 {
 	if (rq.__M_rq_handle == __M_traits_rq_current)
 		return suspended();
-		rq.__M_rq_handle = __M_traits_rq.end();
 
-	suspended   sq_handle = suspended(__M_traits_rq.migrate(rq.__M_rq_handle, __M_traits_sq));
+	if (rq.__M_rq_handle == __M_traits_rq.end())
+		return suspended();
+
+	suspended   sq_handle = suspended(__M_traits_rq.migrate(rq.__M_rq_handle,  __M_traits_sq));
+															rq.__M_rq_handle = __M_traits_rq.end();
 	return      sq_handle;
 }
 
 template <typename ExecutorBranch, typename ExecutorQueue>
 execution::executor_traits<ExecutorBranch, ExecutorQueue>::running execution::executor_traits<ExecutorBranch, ExecutorQueue>::resume(suspended& sq)
 {
-	running   rq_handle = running(__M_traits_sq.migrate(sq.__M_sq_handle, __M_traits_rq));
+	if (sq.__M_sq_handle == __M_traits_sq.end())
+		return running();
+
+	running   rq_handle = running(__M_traits_sq.migrate(sq.__M_sq_handle,  __M_traits_rq));
+														sq.__M_sq_handle = __M_traits_sq.end();
 	return    rq_handle;
 }
 
@@ -95,4 +112,11 @@ template <typename ExecutorBranch, typename ExecutorQueue>
 void execution::executor_traits<ExecutorBranch, ExecutorQueue>::execute()
 {
 	(*++__M_traits_rq_current)();
+}
+
+template <typename ExecutorBranch, typename ExecutorQueue>
+execution::executor_traits<ExecutorBranch, ExecutorQueue>::running 
+	execution::executor_traits<ExecutorBranch, ExecutorQueue>::current()
+{ 
+	return running(__M_traits_rq_current); 
 }

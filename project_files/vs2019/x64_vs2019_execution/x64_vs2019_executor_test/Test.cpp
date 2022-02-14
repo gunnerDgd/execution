@@ -1,58 +1,63 @@
 #include <iostream>
-#include <type_traits>
+#include <thread>
+#include <mutex>
 
-#define TRIGGER_STATIC(type)		  static constexpr type
-#define TRIGGER_REDEFINE(type, alias) typedef type alias;
-#define TRIGGER_USING(type, alias) using alias = type;
+#include <string>
+#include <chrono>
 
-template <std::size_t TriggerId, typename TriggerAction, typename... RemainingAction>
-class basic_trigger : public basic_trigger<TriggerId + 1, RemainingAction...>
+#include <Windows.h>
+
+#include <execution/executor.hpp>
+#include <execution/branch.hpp>
+
+std::chrono::steady_clock::time_point Time;
+
+void test(execution::branch::handle_type& hnd, std::string str)
 {
-public:
-	TRIGGER_STATIC(std::size_t) id = TriggerId;
-	TRIGGER_REDEFINE(TriggerAction, action_type)
+	while (true)
+	{
+		std::cout << (std::uint64_t)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - Time).count() << std::endl;
+		//std::cout << str;
 
-public:
-	template <typename... ExecArgs>
-	void operator()(ExecArgs&&... args) { __M_trigger_action(std::forward<ExecArgs>(args)...) }
+		hnd.yield();
+	}
+}
 
-private:
-	action_type __M_trigger_action;
-};
-
-template <std::size_t TriggerId, typename TriggerAction>
-class basic_trigger<TriggerId, TriggerAction>
-{
-public:
-	TRIGGER_STATIC(std::size_t) id = TriggerId;
-	TRIGGER_REDEFINE(TriggerAction, action_type)
-
-public:
-	template <typename... ExecArgs>
-	void operator()(ExecArgs&&... args) { __M_trigger_action(std::forward<ExecArgs>(args)...) }
-
-private:
-	action_type __M_trigger_action;
-};
-
-template <typename... TriggerAction>
-class trigger_set
-{
-public:
-	typedef basic_trigger<0, TriggerAction...> trigger_type;
-	
-
-private:
-	trigger_type __M_trigger_set;
-};
-
-template <std::size_t N>
-struct __helper_get
-{
-	static constexpr 
-};
 
 int main()
 {
+	using namespace std::string_literals;
+	execution::executor Executor;
 
+	std::mutex lock;
+	std::thread t1([&lock]()
+		{
+			while (true)
+			{
+				lock.lock();
+				Time = std::chrono::high_resolution_clock::now();
+				lock.unlock();
+			}
+		}), t2([&lock]()
+			{
+				while (true)
+				{
+					lock.lock();
+					std::cout << (std::chrono::high_resolution_clock::now() - Time).count() << std::endl;
+					lock.unlock();
+				}
+			});
+
+		t1.join();
+		t2.join();
+
+	auto r1 = Executor.dispatch  (test, "Hello Test1\n"s);
+	auto r2 = Executor.dispatch  (test, "Hello Test2\n"s);
+	auto r3 = Executor.dispatch  (execution::execution_types::avoid, r2, test, "Hello Test3\n");
+	
+	while (true)
+	{
+		Time = std::chrono::high_resolution_clock::now();
+		Executor.execute();
+	}
 }

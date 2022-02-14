@@ -86,8 +86,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\ifstu\Projects\context\include;C:\Users\ifstu\Projects\execution\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\ifstu\Projects\context\libs\x64\windows;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\gunnerD\Projects\context\include;C:\Users\gunnerD\Projects\executor\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\gunnerD\Projects\context\libs\x64\windows;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

@@ -2,6 +2,8 @@
 #include <iterator>
 #include <mutex>
 
+#include <execution/execution_type.hpp>
+
 namespace execution::queueing {
 	template <typename BranchType>
 	class queue
@@ -28,7 +30,15 @@ namespace execution::queueing {
 		bool     empty  () { return (__M_queue_context_start == __M_queue_context_end); }
 
 	public:
+		template <typename EnqueueType>
+		queue_iterator enqueue(EnqueueType&&, queue_iterator&, pointer_type) {  }
+		template <typename EnqueueType>
+		queue_iterator enqueue(EnqueueType&&, queue_iterator&, pointer_type) requires std::is_same_v<std::decay_t<EnqueueType>, execution_types::__avoid>;
+		template <typename EnqueueType>
+		queue_iterator enqueue(EnqueueType&&, queue_iterator&, pointer_type) requires std::is_same_v<std::decay_t<EnqueueType>, execution_types::__adjoint>;
+		
 		queue_iterator enqueue(pointer_type)		  ;
+
 		void		   dequeue(iterator&)			  ;
 		queue_iterator migrate(iterator&, queue_type&);
 
@@ -139,10 +149,32 @@ execution::queueing::queue<BranchType>::iterator execution::queueing::queue<Bran
 template <typename BranchType>
 execution::queueing::queue<BranchType>::queue_iterator execution::queueing::queue<BranchType>::enqueue(pointer_type ptr)
 {
-	queue_lock_guard enq_lock(__M_queue_lock);
+	queue_lock_guard enq_lock			  (__M_queue_lock);
 	chain*			 enq_chain = new chain(__M_queue_context_end->__M_chain_prev, __M_queue_context_end, ptr);
 
-	return iterator(enq_chain);
+	return iterator (enq_chain);
+}
+
+template <typename BranchType>
+template <typename EnqueueType>
+execution::queueing::queue<BranchType>::queue_iterator 
+	execution::queueing::queue<BranchType>::enqueue(EnqueueType&&, queue_iterator& hnd, pointer_type ptr) requires std::is_same_v<std::decay_t<EnqueueType>, execution_types::__avoid>
+{
+	queue_lock_guard enq_lock			  (__M_queue_lock);
+	chain*			 enq_chain = new chain(hnd.__M_it_chain->__M_chain_prev, hnd.__M_it_chain, ptr);
+
+	return iterator (enq_chain);
+}
+
+template <typename BranchType>
+template <typename EnqueueType>
+execution::queueing::queue<BranchType>::queue_iterator 
+	execution::queueing::queue<BranchType>::enqueue(EnqueueType&&, queue_iterator& hnd, pointer_type ptr) requires std::is_same_v<std::decay_t<EnqueueType>, execution_types::__adjoint>
+{
+	queue_lock_guard enq_lock			  (__M_queue_lock);
+	chain*			 enq_chain = new chain(hnd.__M_it_chain, hnd.__M_it_chain->__M_chain_next, ptr);
+
+	return iterator (enq_chain);
 }
 
 template <typename BranchType>

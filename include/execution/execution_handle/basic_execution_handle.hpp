@@ -21,10 +21,7 @@ namespace execution {
 		
 	private:
 		execution_state& __M_handle_state  ;
-		context_type   & __M_handle_pairred, &__M_handle_curr   ;
-
-	private:
-		typedef std::function<void()>
+		context_type   & __M_handle_pairred, &__M_handle_curr;
 	};
 } 
 

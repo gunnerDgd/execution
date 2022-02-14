@@ -1,6 +1,7 @@
 #pragma once
 #include <type_traits>
 #include <execution/trigger/category.hpp>
+#include <execution/execution_type.hpp>
 
 #define EXECUTOR_RUN_TRIGGER(trig, args) if(trig) trig(args); 
 namespace execution {
@@ -17,9 +18,12 @@ namespace execution {
 	public:
 		template <typename ExecType, typename... ExecArgs>
 		running    dispatch(ExecType&&, ExecArgs&&...);
-		suspended  suspend (running&)  ;
-		running    resume  (suspended&);
-		void	   execute ();
+		template <typename DispatchType, typename ExecType, typename... ExecArgs>
+		running    dispatch(DispatchType&&, running&, ExecType&&, ExecArgs&&...);
+
+		suspended  suspend (running&)				  ;
+		running    resume  (suspended&)				  ;
+		void	   execute ()						  ;
 
 	public:
 		template <typename Trigger, typename Action>
@@ -32,8 +36,7 @@ namespace execution {
 		void trigger_if(Trigger&&, Action&&) requires std::is_same_v<std::decay_t<Trigger>, trigger::on_suspended>;
 
 	private:
-		traits_type __M_executor_traits ;
-		running*	__M_executor_current;
+		traits_type __M_executor_traits;
 
 	private:
 		std::function<void(running&)>   __M_executor_onResumed  ;
@@ -47,6 +50,14 @@ execution::basic_executor<ExecutorBranch, ExecutorTraits>::running
 	execution::basic_executor<ExecutorBranch, ExecutorTraits>::dispatch(ExecType&& exec, ExecArgs&&... args)
 {
 	return __M_executor_traits.dispatch(exec, std::forward<ExecArgs>(args)...);
+}
+
+template <typename ExecutorBranch, typename ExecutorTraits>
+template <typename DispatchType, typename ExecType, typename... ExecArgs>
+execution::basic_executor<ExecutorBranch, ExecutorTraits>::running
+	execution::basic_executor<ExecutorBranch, ExecutorTraits>::dispatch(DispatchType&& type, running& hnd, ExecType&& exec, ExecArgs&&... args)
+{
+	return __M_executor_traits.dispatch(type, hnd, exec, std::forward<ExecArgs>(args)...);
 }
 
 template <typename ExecutorBranch, typename ExecutorTraits>
@@ -79,7 +90,7 @@ template <typename ExecutorBranch, typename ExecutorTraits>
 template <typename Trigger, typename Action>
 void execution::basic_executor<ExecutorBranch, ExecutorTraits>::trigger_if(Trigger&&, Action&& action) requires std::is_same_v<std::decay_t<Trigger>, trigger::on_resumed>
 {
-	__M_executor_onResumed = action;
+	__M_executor_onResumed   = action;
 }
 
 template <typename ExecutorBranch, typename ExecutorTraits>
