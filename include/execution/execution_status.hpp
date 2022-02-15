@@ -35,7 +35,7 @@ std::underlying_type_t<execution::execution_state> execution::operator^ (executi
 
 std::underlying_type_t<execution::execution_state> execution::operator& (execution_state lhs, execution_state rhs)
 {
-	return std::underlying_type_t<execution::execution_state>(lhs) ^ std::underlying_type_t<execution_state>(rhs);
+	return std::underlying_type_t<execution::execution_state>(lhs) & std::underlying_type_t<execution_state>(rhs);
 }
 
 std::underlying_type_t<execution::execution_state> execution::operator|= (execution_state lhs, execution_state rhs)
@@ -50,5 +50,5 @@ std::underlying_type_t<execution::execution_state> execution::operator^= (execut
 
 std::underlying_type_t<execution::execution_state> execution::operator&= (execution_state lhs, execution_state rhs)
 {
-	return std::underlying_type_t<execution::execution_state>(lhs) ^ std::underlying_type_t<execution_state>(rhs);
+	return std::underlying_type_t<execution::execution_state>(lhs) & std::underlying_type_t<execution_state>(rhs);
 }

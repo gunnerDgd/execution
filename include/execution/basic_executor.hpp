@@ -12,7 +12,7 @@ namespace execution {
 		typedef			 ExecutorBranch			    branch_type;
 		typedef			 ExecutorTraits				traits_type;
 		
-		typedef typename ExecutorTraits::running    running;
+		typedef typename ExecutorTraits::running    running  ;
 		typedef typename ExecutorTraits::suspended  suspended;
 
 	public:
@@ -21,9 +21,9 @@ namespace execution {
 		template <typename DispatchType, typename ExecType, typename... ExecArgs>
 		running    dispatch(DispatchType&&, running&, ExecType&&, ExecArgs&&...);
 
-		suspended  suspend (running&)				  ;
-		running    resume  (suspended&)				  ;
-		void	   execute ()						  ;
+		suspended  suspend (running&)  ;
+		running    resume  (suspended&);
+		bool	   execute ()		   ;
 
 	public:
 		template <typename Trigger, typename Action>
@@ -35,12 +35,19 @@ namespace execution {
 		template <typename Trigger, typename Action>
 		void trigger_if(Trigger&&, Action&&) requires std::is_same_v<std::decay_t<Trigger>, trigger::on_suspended>;
 
-	private:
-		traits_type __M_executor_traits;
+		template <typename Trigger, typename Action>
+		void trigger_if(Trigger&&, Action&&) requires std::is_same_v<std::decay_t<Trigger>, trigger::on_executed> ;
+
+		template <typename Trigger, typename Action>
+		void trigger_if(Trigger&&, Action&&) requires std::is_same_v<std::decay_t<Trigger>, trigger::on_stopped>  ;
 
 	private:
-		std::function<void(running&)>   __M_executor_onResumed  ;
+		traits_type						__M_executor_traits     ;
 		std::function<void(suspended&)> __M_executor_onSuspended;
+
+		std::function<void(running&)>   __M_executor_onResumed  ,
+										__M_executor_onExecuted ,
+										__M_executor_onStopped  ;
 	};
 }
 
@@ -81,9 +88,12 @@ execution::basic_executor<ExecutorBranch, ExecutorTraits>::running
 }
 
 template <typename ExecutorBranch, typename ExecutorTraits>
-void execution::basic_executor<ExecutorBranch, ExecutorTraits>::execute()
+bool execution::basic_executor<ExecutorBranch, ExecutorTraits>::execute()
 {
-	__M_executor_traits.execute();
+					     __M_executor_traits.execute();
+	auto exec_curr     = __M_executor_traits.current();
+
+	EXECUTOR_RUN_TRIGGER(__M_executor_onExecuted, __M_executor_traits.current());
 }
 
 template <typename ExecutorBranch, typename ExecutorTraits>
@@ -98,4 +108,18 @@ template <typename Trigger, typename Action>
 void execution::basic_executor<ExecutorBranch, ExecutorTraits>::trigger_if(Trigger&&, Action&& action) requires std::is_same_v<std::decay_t<Trigger>, trigger::on_suspended>
 {
 	__M_executor_onSuspended = action;
+}
+
+template <typename ExecutorBranch, typename ExecutorTraits>
+template <typename Trigger, typename Action>
+void execution::basic_executor<ExecutorBranch, ExecutorTraits>::trigger_if(Trigger&&, Action&& action) requires std::is_same_v<std::decay_t<Trigger>, trigger::on_executed>
+{
+	__M_executor_onExecuted = action;
+}
+
+template <typename ExecutorBranch, typename ExecutorTraits>
+template <typename Trigger, typename Action>
+void execution::basic_executor<ExecutorBranch, ExecutorTraits>::trigger_if(Trigger&&, Action&& action) requires std::is_same_v<std::decay_t<Trigger>, trigger::on_stopped>
+{
+	__M_executor_onStopped = action;
 }

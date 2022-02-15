@@ -28,12 +28,12 @@ namespace execution {
 		running   dispatch(ExecType&&, ExecArgs&&...);
 		template <typename DispatchType, typename ExecType, typename... ExecArgs>
 		running   dispatch(DispatchType&&, running&, ExecType&&, ExecArgs&&...);
-
-		suspended suspend (running&)				 ;
-		running   resume  (suspended&)				 ;
 		
-		void      execute ()						 ;
-		running   current ()						 ;
+		suspended suspend (running&)  ;
+		running   resume  (suspended&);
+		
+		bool      execute ();
+		running   current ();
 	
 	private:
 		queue_type  __M_traits_rq, __M_traits_sq;
@@ -50,6 +50,10 @@ namespace execution {
 		running(handle_type hnd) : __M_rq_handle(hnd) {  }
 		running()									  {  }
 
+		bool operator==   (running& cmp) { return __M_rq_handle == cmp.__M_rq_handle; }
+		bool operator!=   (running& cmp) { return __M_rq_handle != cmp.__M_rq_handle; }
+			 operator bool()			 { return __M_rq_handle; }
+
 	private:
 		handle_type __M_rq_handle;
 	};
@@ -63,6 +67,10 @@ namespace execution {
 
 		suspended(handle_type hnd)  : __M_sq_handle(hnd) {  }
 		suspended()										 {  }
+
+		bool operator==   (suspended& cmp) { return __M_sq_handle == cmp.__M_sq_handle; }
+		bool operator!=   (suspended& cmp) { return __M_sq_handle != cmp.__M_sq_handle; }
+			 operator bool()			   { return __M_sq_handle; }
 
 	private:
 		handle_type __M_sq_handle;
@@ -103,15 +111,23 @@ execution::executor_traits<ExecutorBranch, ExecutorQueue>::running execution::ex
 	if (sq.__M_sq_handle == __M_traits_sq.end())
 		return running();
 
-	running   rq_handle = running(__M_traits_sq.migrate(sq.__M_sq_handle,  __M_traits_rq));
-														sq.__M_sq_handle = __M_traits_sq.end();
-	return    rq_handle;
+	running rq_handle = running(__M_traits_sq.migrate(sq.__M_sq_handle,  __M_traits_rq));
+													  sq.__M_sq_handle = __M_traits_sq.end();
+	return  rq_handle;
 }
 
 template <typename ExecutorBranch, typename ExecutorQueue>
-void execution::executor_traits<ExecutorBranch, ExecutorQueue>::execute()
+bool execution::executor_traits<ExecutorBranch, ExecutorQueue>::execute()
 {
+	if  ( __M_traits_rq.empty() )						return false;
+	if ((*__M_traits_rq_current).state() & execution_state::ended) 
+	{
+		    __M_traits_rq.dequeue(__M_traits_rq_current);
+		if (__M_traits_rq.empty())						return false;
+	}
+	
 	(*++__M_traits_rq_current)();
+	return true;
 }
 
 template <typename ExecutorBranch, typename ExecutorQueue>

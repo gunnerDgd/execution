@@ -13,6 +13,7 @@ namespace execution::queueing {
 		class   iterator;
 		typedef iterator		  queue_iterator;
 		typedef queue<BranchType> queue_type;
+		typedef std::size_t       count_type;
 		
 		typedef std::mutex										queue_lock;
 		typedef std::lock_guard<std::mutex>						queue_lock_guard;
@@ -27,7 +28,7 @@ namespace execution::queueing {
 	public:
 		iterator begin  ();
 		iterator end    ();
-		bool     empty  () { return (__M_queue_context_start == __M_queue_context_end); }
+		bool     empty  () { return (__M_queue_size == 0); }
 
 	public:
 		template <typename EnqueueType>
@@ -38,14 +39,16 @@ namespace execution::queueing {
 		queue_iterator enqueue(EnqueueType&&, queue_iterator&, pointer_type) requires std::is_same_v<std::decay_t<EnqueueType>, execution_types::__adjoint>;
 		
 		queue_iterator enqueue(pointer_type)		  ;
-
 		void		   dequeue(iterator&)			  ;
+		
 		queue_iterator migrate(iterator&, queue_type&);
 
 	private:
 		chain	 * __M_queue_context,
 				 * __M_queue_context_start, *__M_queue_context_end;
+		
 		queue_lock __M_queue_lock;
+		count_type __M_queue_size = 0;
 	};
 
 	template <typename BranchType>
@@ -105,11 +108,17 @@ namespace execution::queueing {
 		iterator()			      : __M_it_chain(nullptr)		    {  }
 
 	public:
-		iterator&      operator= (iterator_type&  copy) { __M_it_chain = copy.__M_it_chain;								  return *this; }
-		iterator&      operator= (iterator_type&& move) { __M_it_chain = move.__M_it_chain; move.__M_it_chain = nullptr;  return *this; }
+		iterator&      operator=	(iterator_type&  copy) { __M_it_chain = copy.__M_it_chain;								  return *this; }
+		iterator&      operator=	(iterator_type&& move) { __M_it_chain = move.__M_it_chain; move.__M_it_chain = nullptr;  return *this; }
 
-		bool		   operator==(iterator_type& cmp)  { return __M_it_chain == cmp.__M_it_chain; }
-		bool		   operator!=(iterator_type& cmp)  { return __M_it_chain != cmp.__M_it_chain; }
+		bool		   operator==   (iterator_type& cmp)   { return __M_it_chain == cmp.__M_it_chain; }
+		bool		   operator!=   (iterator_type& cmp)   { return __M_it_chain != cmp.__M_it_chain; }
+					   operator bool() 
+		{
+			if (!__M_it_chain)					 return false;
+			if (!__M_it_chain->__M_chain_branch) return false;
+									 			 return true ;
+		}
 
 		iterator_type& operator++() { __M_it_chain = __M_it_chain->__M_chain_next; return *this; }
 		iterator_type& operator--() { __M_it_chain = __M_it_chain->__M_chain_prev; return *this; }
@@ -152,6 +161,7 @@ execution::queueing::queue<BranchType>::queue_iterator execution::queueing::queu
 	queue_lock_guard enq_lock			  (__M_queue_lock);
 	chain*			 enq_chain = new chain(__M_queue_context_end->__M_chain_prev, __M_queue_context_end, ptr);
 
+	++__M_queue_size;
 	return iterator (enq_chain);
 }
 
@@ -163,6 +173,7 @@ execution::queueing::queue<BranchType>::queue_iterator
 	queue_lock_guard enq_lock			  (__M_queue_lock);
 	chain*			 enq_chain = new chain(hnd.__M_it_chain->__M_chain_prev, hnd.__M_it_chain, ptr);
 
+	++__M_queue_size;
 	return iterator (enq_chain);
 }
 
@@ -174,15 +185,20 @@ execution::queueing::queue<BranchType>::queue_iterator
 	queue_lock_guard enq_lock			  (__M_queue_lock);
 	chain*			 enq_chain = new chain(hnd.__M_it_chain, hnd.__M_it_chain->__M_chain_next, ptr);
 
+	++__M_queue_size;
 	return iterator (enq_chain);
 }
 
 template <typename BranchType>
 void execution::queueing::queue<BranchType>::dequeue(iterator& it)
 {
-	queue_lock_guard deq_lock(__M_queue_lock);
-	delete				   it.__M_it_chain.__M_chain_branch;
-						   it = iterator  (__M_queue_context_start);
+	queue_lock_guard deq_lock     (__M_queue_lock);
+	chain			*deq_next = it.__M_it_chain->__M_chain_next;
+	
+						 delete it.__M_it_chain;
+								it.__M_it_chain = deq_next;
+
+	--__M_queue_size;
 }
 
 template <typename BranchType>
@@ -192,6 +208,7 @@ execution::queueing::queue<BranchType>::queue_iterator execution::queueing::queu
 	pointer_type	 br_mig = &(*it);
 							     it.__M_it_chain->__M_chain_branch = nullptr;
 	
+			--__M_queue_size;
 	delete it.__M_it_chain;
 		   it = iterator(__M_queue_context_start);
 

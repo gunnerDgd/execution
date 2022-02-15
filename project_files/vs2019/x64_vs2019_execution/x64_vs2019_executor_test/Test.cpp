@@ -1,3 +1,5 @@
+#include <boost/asio.hpp>
+
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -5,59 +7,69 @@
 #include <string>
 #include <chrono>
 
-#include <Windows.h>
-
 #include <execution/executor.hpp>
 #include <execution/branch.hpp>
 
-std::chrono::steady_clock::time_point Time;
+#include <Windows.h>
 
-void test(execution::branch::handle_type& hnd, std::string str)
+std::chrono::steady_clock::time_point heavy_time_point;
+std::chrono::steady_clock::time_point light_time_point;
+
+void test_branch_heavy_task(execution::branch::handle_type& hnd)
 {
-	while (true)
-	{
-		std::cout << (std::uint64_t)std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - Time).count() << std::endl;
-		//std::cout << str;
+	heavy_time_point = std::chrono::high_resolution_clock::now();
 
+	for (int k = 0; k < 10; k++)
+	{
+		Sleep (100);
 		hnd.yield();
 	}
+	
+	std::cout << "Branch #1 Executed.\n";
+	std::cout << "HEAVY TASK (BRANCH) :: " << (std::chrono::high_resolution_clock::now() - light_time_point).count() << " Ellapsed.\n";
 }
 
+void test_branch_light_task(execution::branch::handle_type& hnd)
+{
+	light_time_point = std::chrono::high_resolution_clock::now();
+	
+	Sleep(100);
+	std::cout << "Branch #2 Executed.\n";
+	std::cout << "LIGHT TASK (BRANCH) :: " << (std::chrono::high_resolution_clock::now() - light_time_point).count() << " Ellapsed.\n";
+}
+
+void test_asio_heavy_task()
+{
+	heavy_time_point = std::chrono::high_resolution_clock::now();
+
+	Sleep(1000);
+	std::cout << "ASIO #1 Executed.\n";
+	std::cout << "HEAVY TASK (ASIO) :: " << (std::chrono::high_resolution_clock::now() - light_time_point).count() << " Ellapsed.\n";
+}
+
+void test_asio_light_task()
+{
+	light_time_point = std::chrono::high_resolution_clock::now();
+
+	Sleep(100);
+	std::cout << "ASIO #2 Executed.\n";
+	std::cout << "LIGHT TASK (ASIO) :: " << (std::chrono::high_resolution_clock::now() - light_time_point).count() << " Ellapsed.\n";
+}
 
 int main()
 {
 	using namespace std::string_literals;
-	execution::executor Executor;
-
-	std::mutex lock;
-	std::thread t1([&lock]()
-		{
-			while (true)
-			{
-				lock.lock();
-				Time = std::chrono::high_resolution_clock::now();
-				lock.unlock();
-			}
-		}), t2([&lock]()
-			{
-				while (true)
-				{
-					lock.lock();
-					std::cout << (std::chrono::high_resolution_clock::now() - Time).count() << std::endl;
-					lock.unlock();
-				}
-			});
-
-		t1.join();
-		t2.join();
-
-	auto r1 = Executor.dispatch  (test, "Hello Test1\n"s);
-	auto r2 = Executor.dispatch  (test, "Hello Test2\n"s);
-	auto r3 = Executor.dispatch  (execution::execution_types::avoid, r2, test, "Hello Test3\n");
 	
-	while (true)
-	{
-		Time = std::chrono::high_resolution_clock::now();
-		Executor.execute();
-	}
+	execution::executor     Executor;
+	boost::asio::io_context BoostExecutor;
+	
+	BoostExecutor.dispatch(test_asio_heavy_task);
+	for(int i = 0 ; i < 10 ; i++)
+		BoostExecutor.dispatch(test_asio_light_task);
+	
+	auto r1 = Executor.dispatch(test_branch_heavy_task);
+	auto r2 = Executor.dispatch(test_branch_light_task);
+	
+	while (Executor.execute());
+	while (true)			  BoostExecutor.run();
 }

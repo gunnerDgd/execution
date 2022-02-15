@@ -27,7 +27,7 @@ namespace execution {
 
 	public:
 		void			operator()();
-		execution_state state	  () { return				 __M_branch_status; }
+		execution_state state	  () { return __M_branch_status; }
 
 	public:
 		template <typename TriggerCategory, typename TriggerAction>
@@ -65,7 +65,7 @@ namespace execution {
 
 template <typename BranchContext, typename BranchTrait, typename BranchHandle>
 template <typename ExecType, typename... ExecArgs>
-execution::basic_execution_branch<BranchContext, BranchTrait, BranchHandle>::basic_execution_branch(ExecType&& exec, ExecArgs&&... args) : __M_branch_context_pairred(4096 * 4),
+execution::basic_execution_branch<BranchContext, BranchTrait, BranchHandle>::basic_execution_branch(ExecType&& exec, ExecArgs&&... args) : __M_branch_context_pairred(4096 * 8),
 																																		   __M_branch_status		 (execution_state::standby)
 {
 	auto exec_pack = trait_type::to_pack						 (__M_branch_context, __M_branch_context_pairred, __M_branch_status, exec, std::forward<ExecArgs>(args)...);

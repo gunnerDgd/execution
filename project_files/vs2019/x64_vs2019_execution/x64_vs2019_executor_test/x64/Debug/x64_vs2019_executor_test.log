@@ -1,3 +1,6 @@
 ﻿  Test.cpp
-x64_vs2019_context.lib(stack_page.obj) : warning LNK4099: PDB 'x64_vs2019_context.pdb' was not found with 'x64_vs2019_context.lib(stack_page.obj)' or at 'C:\Users\gunnerD\Projects\executor\project_files\vs2019\x64_vs2019_execution\x64\Debug\x64_vs2019_context.pdb'; linking object as if no debug info
+  Please define _WIN32_WINNT or _WIN32_WINDOWS appropriately. For example:
+  - add -D_WIN32_WINNT=0x0601 to the compiler command line; or
+  - add _WIN32_WINNT=0x0601 to your project's Preprocessor Definitions.
+  Assuming _WIN32_WINNT=0x0601 (i.e. Windows 7 target).
   x64_vs2019_executor_test.vcxproj -> C:\Users\gunnerD\Projects\executor\project_files\vs2019\x64_vs2019_execution\x64\Debug\x64_vs2019_executor_test.exe
