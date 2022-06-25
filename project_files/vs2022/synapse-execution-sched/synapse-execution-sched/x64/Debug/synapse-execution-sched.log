@@ -1,0 +1,16 @@
+﻿  execution_sched_system_exec.c
+E:\Programming\C++\Projects\Experimental\synapse-execution\source\c\sched\system_sched\details\execution_sched_system_exec.c(8,32): warning C4047: 'function': 'ULONG_PTR' differs in levels of indirection from '__synapse_execution_sched_system *'
+E:\Programming\C++\Projects\Experimental\synapse-execution\source\c\sched\system_sched\details\execution_sched_system_exec.c(8,26): warning C4024: 'PostQueuedCompletionStatus': different types for formal and actual parameter 3
+E:\Programming\C++\Projects\Experimental\synapse-execution\source\c\sched\system_sched\details\execution_sched_system_exec.c(8,39): warning C4133: 'function': incompatible types - from '__synapse_execution_sched_task *' to 'LPOVERLAPPED'
+E:\Programming\C++\Projects\Experimental\synapse-execution\source\c\sched\system_sched\details\execution_sched_system_exec.c(21,40): warning C4133: 'function': incompatible types - from '__synapse_execution_sched_system *' to 'PULONG_PTR'
+E:\Programming\C++\Projects\Experimental\synapse-execution\source\c\sched\system_sched\details\execution_sched_system_exec.c(21,51): warning C4133: 'function': incompatible types - from '__synapse_execution_sched_task **' to 'LPOVERLAPPED *'
+  execution_sched_system_init.c
+E:\Programming\C++\Projects\Experimental\synapse-execution\source\c\sched\system_sched\details\execution_sched_system_init.c(12,39): warning C4047: 'function': 'ULONG_PTR' differs in levels of indirection from '__synapse_execution_sched_system *'
+E:\Programming\C++\Projects\Experimental\synapse-execution\source\c\sched\system_sched\details\execution_sched_system_init.c(12,30): warning C4024: 'CreateIoCompletionPort': different types for formal and actual parameter 3
+  execution_sched_system_task.c
+E:\Programming\C++\Projects\Experimental\synapse-execution\source\c\sched\system_sched\details\execution_sched_system_task.c(17,7): warning C4013: 'synapse_memory_opaque_valid' undefined; assuming extern returning int
+  syssched_exec.c
+  syssched_init.c
+  syssched_task.c
+  Generating Code...
+  synapse-execution-sched.vcxproj -> E:\Programming\C++\Projects\Experimental\synapse-execution\libs\x64\debug\sched\synapse-execution-sched.lib
