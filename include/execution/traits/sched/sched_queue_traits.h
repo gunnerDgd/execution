@@ -4,7 +4,7 @@
 
 synapse_execution_opaque_declare
 	(synapse_execution_sched_queue_handle)
-
+	
 synapse_execution_opaque_declare
 	(synapse_execution_sched_queue_entity)
 
