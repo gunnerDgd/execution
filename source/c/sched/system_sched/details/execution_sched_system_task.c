@@ -14,12 +14,12 @@ __synapse_execution_sched_system_task_initialize
 		ptr_task_mpool = pSched->ptr_mpool->allocate
 							(pSched->ptr_mpool->hnd_traits, NULL);
 
-		if(!synapse_memory_opaque_valid(ptr_task_mpool))
+		if(!synapse_execution_opaque_valid(ptr_task_mpool))
 			pSched->ptr_mpool->expand_size
 				(pSched->ptr_mpool->hnd_traits,
 				 pSched->ptr_mpool->current_size(pSched->ptr_mpool->hnd_traits) * 2);
 		
-	} while (!synapse_memory_opaque_valid(ptr_task_mpool));
+	} while (!synapse_execution_opaque_valid(ptr_task_mpool));
 
 	ptr_task
 		= pSched->ptr_mpool->retrieve_pointer

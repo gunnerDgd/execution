@@ -4,7 +4,7 @@
 synapse_execution_sched_context
 synapse_execution_sched_context_initialize
 	(synapse_memory_pooling_dynamic_traits *pMpool, 
-	 synapse_execution_sched_queue_entity  *pQueue)
+	 synapse_execution_sched_queue_traits  *pQueue)
 {
 	synapse_execution_opaque_init
 		(synapse_execution_sched_context,

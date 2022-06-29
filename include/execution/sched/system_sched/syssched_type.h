@@ -1,9 +1,13 @@
 #pragma once
 #include <execution/defines/opaque/opaque.h>
+#include <execution/defines/export.h>
+
 #include <memory/pooling/dynamic_pooling_traits.h>
 
-synapse_execution_opaque_declare
-	(synapse_execution_sched_system)
+#include <execution/traits/sched/sched_traits.h>
 
-synapse_execution_opaque_declare
-	(synapse_execution_sched_system_task)
+typedef synapse_execution_sched_task   
+			synapse_execution_sched_system_task;
+
+typedef synapse_execution_sched_entity 
+			synapse_execution_sched_system;

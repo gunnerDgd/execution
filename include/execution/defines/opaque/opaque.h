@@ -11,3 +11,6 @@
 
 #define synapse_execution_opaque_init(pObject, pName, pValue)\
 	pObject pName = { .opaque = pValue }
+
+#define synapse_execution_opaque_valid(pObject)\
+	((pObject.opaque) != NULL)

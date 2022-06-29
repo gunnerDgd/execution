@@ -16,10 +16,13 @@ typedef struct synapse_execution_sched_traits
 		(*execute_once)
 			(synapse_execution_sched_entity);
 	void
-		(*execute_multuple)
+		(*execute_multiple)
 			(synapse_execution_sched_entity, size_t);
 	void
 		(*dispatch)
 			(synapse_execution_sched_entity, synapse_execution_sched_task);
+	synapse_execution_sched_task
+		(*dispatch_from_proc)
+			(synapse_execution_sched_entity, void(*)(void*), void*);
 	
 } synapse_execution_sched_traits;
