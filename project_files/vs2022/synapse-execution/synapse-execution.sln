@@ -5,6 +5,8 @@ VisualStudioVersion = 17.2.32516.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "synapse-execution", "synapse-execution\synapse-execution.vcxproj", "{A0130B59-68D4-4001-88A4-1545803E9374}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "synapse-execution-module", "synapse-execution-module\synapse-execution-module.vcxproj", "{732A2BD6-72FA-470D-AB5D-826AFE5C8EF4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{A0130B59-68D4-4001-88A4-1545803E9374}.Release|x64.Build.0 = Release|x64
 		{A0130B59-68D4-4001-88A4-1545803E9374}.Release|x86.ActiveCfg = Release|Win32
 		{A0130B59-68D4-4001-88A4-1545803E9374}.Release|x86.Build.0 = Release|Win32
+		{732A2BD6-72FA-470D-AB5D-826AFE5C8EF4}.Debug|x64.ActiveCfg = Debug|x64
+		{732A2BD6-72FA-470D-AB5D-826AFE5C8EF4}.Debug|x64.Build.0 = Debug|x64
+		{732A2BD6-72FA-470D-AB5D-826AFE5C8EF4}.Debug|x86.ActiveCfg = Debug|Win32
+		{732A2BD6-72FA-470D-AB5D-826AFE5C8EF4}.Debug|x86.Build.0 = Debug|Win32
+		{732A2BD6-72FA-470D-AB5D-826AFE5C8EF4}.Release|x64.ActiveCfg = Release|x64
+		{732A2BD6-72FA-470D-AB5D-826AFE5C8EF4}.Release|x64.Build.0 = Release|x64
+		{732A2BD6-72FA-470D-AB5D-826AFE5C8EF4}.Release|x86.ActiveCfg = Release|Win32
+		{732A2BD6-72FA-470D-AB5D-826AFE5C8EF4}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

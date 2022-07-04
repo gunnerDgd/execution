@@ -58,7 +58,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -90,7 +90,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>E:\Programming\C++\Projects\Experimental\synapse-context\include;E:\Programming\C++\Projects\Experimental\synapse-execution\include;E:\Programming\C++\Projects\Experimental\synapse-structure\include;E:\Programming\C++\Projects\Experimental\synapse-memory\include</IncludePath>
-    <OutDir>E:\Programming\C++\Projects\Experimental\synapse-execution\bin\x64\debug\</OutDir>
+    <OutDir>E:\Programming\C++\Projects\Experimental\synapse-execution\libs\x64\debug\sched\</OutDir>
     <LibraryPath>E:\Programming\C++\Projects\Experimental\synapse-context\libs\x64\windows;E:\Programming\C++\Projects\Experimental\synapse-memory\libs\x64\debug;E:\Programming\C++\Projects\Experimental\synapse-structure\libs\x64\debug\lib-queue;E:\Programming\C++\Projects\Experimental\synapse-structure\libs\x64\debug\lib-list;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -131,7 +131,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>synapse_execution_export_mode;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>synapse_execution_staticlib_mode;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>

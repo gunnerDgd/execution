@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\include\execution\defines\export.h" />
     <ClInclude Include="..\..\..\..\include\execution\defines\opaque\opaque.h" />
     <ClInclude Include="..\..\..\..\include\execution\traits\sched\sched_queue_traits.h" />
     <ClInclude Include="..\..\..\..\include\execution\traits\sched\sched_traits.h" />

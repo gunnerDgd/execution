@@ -1,2 +1,8 @@
-﻿  context_init.c
-  synapse-execution-sched-context.vcxproj -> E:\Programming\C++\Projects\Experimental\synapse-execution\bin\x64\debug\synapse-execution-sched-context.dll
+﻿  context_exec.c
+  context_init.c
+  context_task.c
+  execution_sched_context_exec.c
+  execution_sched_context_init.c
+  execution_sched_context_task.c
+  Generating Code...
+  synapse-execution-sched-context.vcxproj -> E:\Programming\C++\Projects\Experimental\synapse-execution\libs\x64\debug\sched\synapse-execution-sched-context.lib

@@ -14,7 +14,7 @@ synapse_execution_sched_system_dispatch
 }
 
 synapse_execution_sched_system_task
-synapse_execution_sched_systsem_dispatch_from_proc
+synapse_execution_sched_system_dispatch_from_proc
 	(synapse_execution_sched_system pSched, void(*pProc)(void*), void* pProcParam)
 {
 	synapse_execution_sched_system_task ptr_task
