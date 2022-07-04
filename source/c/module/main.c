@@ -8,6 +8,9 @@
 
 #include <string.h>
 
+static synapse_execution_sched_traits
+			__synapse_execution_module_sched_typedata;
+
 synapse_execution_export
 	void
 		synapse_modules_initialize
@@ -36,5 +39,6 @@ synapse_execution_export
 					(pHandle);
 	
 	synapse_modules_component_manager_register_interface
-		(hnd_compmgr, synapse_execution_syssched_export(), "system_sched");
+		(hnd_compmgr, synapse_execution_syssched_export(), "system_sched",
+				&__synapse_execution_module_sched_typedata);
 }
