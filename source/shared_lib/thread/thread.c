@@ -33,7 +33,7 @@ void
     synapse_wait_thread
         (synapse_thread pThread)
 {
-    synapse_wait_thread
+    synapse_execution_thread_wait
         (pThread);
 }
 

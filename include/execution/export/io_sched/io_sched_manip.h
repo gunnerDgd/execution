@@ -8,7 +8,7 @@ synapse_execution_dll
         synapse_dispath_file_read_to_io_scheduler
             (synapse_io_scheduler,
                 synapse_io_schedule_handle_file,
-                    synapse_execution_io_task, size_t);
+                    synapse_io_scheduler_task, size_t);
 
 synapse_execution_dll
     void
