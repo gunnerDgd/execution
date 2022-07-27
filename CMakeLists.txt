@@ -6,5 +6,10 @@ project(
     LANGUAGES C
 )
 
-add_subdirectory(source/lib)
-add_subdirectory(source/shared_lib)
+if(SYNAPSE_BUILD_STATIC_LIB)
+    add_subdirectory(source/lib)
+endif()
+
+if(SYNAPSE_BUILD_SHARED_LIB)
+    add_subdirectory(source/shared_lib)
+endif()

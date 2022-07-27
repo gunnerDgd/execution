@@ -26,15 +26,43 @@ target_include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../../include
 )
 
-target_compile_options(
-    synapse_execution_dll
-    PUBLIC
-    /Dsynapse_execution_export_mode
-)
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+    set_target_properties(
+        synapse_execution_dll
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/lib/build
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    )
+
+    target_compile_options(
+        synapse_execution_dll 
+        PRIVATE 
+        /Dsynapse_execution_export_mode
+    )
+
+    target_link_libraries(
+        synapse_execution_dll
+        ws2_32
+    )
+elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    set_target_properties(
+        synapse_execution_dll
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    )
+
+    target_compile_options(
+        synapse_execution_dll 
+        PRIVATE 
+        -Dsynapse_execution_export_mode
+    )
+endif()
 
 target_link_libraries(
     synapse_execution_dll
-    ws2_32
     synapse_execution_lib
     synapse_networking_lib
     synapse_filesystem_lib
