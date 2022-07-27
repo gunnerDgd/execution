@@ -1,3 +1,5 @@
+#pragma once
+
 #include <WinSock2.h>
 #include <synapse/memory/pooling/dynamic_pooling.h>
 

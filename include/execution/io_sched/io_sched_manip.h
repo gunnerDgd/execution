@@ -1,3 +1,4 @@
+#pragma once
 #include <execution/io_sched/details/iosched_type.h>
 
 void

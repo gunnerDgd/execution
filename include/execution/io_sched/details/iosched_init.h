@@ -1,3 +1,4 @@
+#pragma once
 #include <execution/io_sched/details/iosched_type.h>
 
 __synapse_execution_io_sched*

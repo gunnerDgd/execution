@@ -1,3 +1,5 @@
+#pragma once
+
 #include <execution/interface/sched/io_sched.h>
 
 #include <synapse/filesystem/interface/file/file.h>

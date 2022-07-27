@@ -1,3 +1,4 @@
+#pragma once
 #include <execution/defines/handle/opaque_handle.h>
 
 #include <stdint.h>

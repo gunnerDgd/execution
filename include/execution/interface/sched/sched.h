@@ -1,3 +1,4 @@
+#pragma once
 #include <execution/defines/handle/opaque_handle.h>
 
 synapse_execution_opaque_declare
