@@ -7,8 +7,7 @@
 
 void
     synapse_execution_thread_dispatch
-        (synapse_execution_thread,
-            void(*)(void*), void*);
+        (synapse_execution_thread, void(*)(void*), void*);
 
 void
     synapse_execution_thread_wait

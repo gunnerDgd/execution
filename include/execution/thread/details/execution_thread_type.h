@@ -7,20 +7,26 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#define __synapse_execution_thread_state_standby 0
-#define __synapse_execution_thread_state_running 1
-#define __synapse_execution_thread_state_stopped 2
+#include <synapse/structure/queue/lockfree/mpmc.h>
+
+#define __synapse_execution_thread_queue_default 256
+#define __synapse_execution_thread_loop_begin    while(true) {
+#define __synapse_execution_thread_loop_end      }
+
+typedef struct
+    __synapse_execution_thread_task
+{
+    void
+        (*ptr_thread_task)(void*);
+    void *ptr_thread_task_parameter;
+} __synapse_execution_thread_task;
 
 typedef struct
     __synapse_execution_thread
 {
     HANDLE
-          hnd_thread,
-          hnd_thread_execution_event;
-    void
-        (*ptr_thread_exec)(void*);
-    void
-         *ptr_thread_exec_param;
-    volatile uint8_t
-          flag_thread_execution;
+        hnd_thread,
+        hnd_thread_execution_event;
+    synapse_mpmc_queue
+        hnd_thread_queue; 
 } __synapse_execution_thread;

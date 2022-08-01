@@ -6,6 +6,10 @@
 
 synapse_thread
     synapse_initialize_thread
+        (size_t);
+
+synapse_thread
+    synapse_initialize_thread_default
         ();
 
 void
@@ -13,7 +17,7 @@ void
         (synapse_thread);
 
 void
-    synapse_dispatch_to_thread
+    synapse_dispatch_task_to_thread
         (synapse_thread, void(*)(void*), void*);
 
 void

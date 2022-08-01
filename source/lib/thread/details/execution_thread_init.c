@@ -3,26 +3,22 @@
 
 __synapse_execution_thread*
     __synapse_execution_thread_initialize
-        ()
+        (size_t pThreadQueueSize)
 {
     __synapse_execution_thread*
         ptr_thread
             = synapse_system_allocate
                     (sizeof(__synapse_execution_thread));
     
-    ptr_thread->flag_thread_execution
-        = true;
-    ptr_thread->ptr_thread_exec
-        = NULL;
-    ptr_thread->ptr_thread_exec_param
-        = NULL;
-
+    ptr_thread->hnd_thread_queue
+        = synapse_initialize_mpmc_queue
+                (pThreadQueueSize);
     ptr_thread->hnd_thread_execution_event
         = CreateEvent
                 (NULL, FALSE, FALSE, NULL);
     ptr_thread->hnd_thread
         = _beginthreadex
-                (0, 0, ptr_thread->ptr_thread_exec,
+                (0, 0, __synapse_execution_thread_loop,
                     ptr_thread, 0, 0);
 
     return
@@ -33,30 +29,40 @@ void
     __synapse_execution_thread_loop
         (__synapse_execution_thread* pThread)
 {
-    while
-        (pThread->flag_thread_execution
-            != __synapse_execution_thread_state_stopped)
-    {
-        WaitForSingleObject
-            (pThread->hnd_thread_execution_event,
-                INFINITE);
+    __synapse_execution_thread_task
+        *ptr_task;
+    __synapse_execution_thread_loop_begin
+        ptr_task
+            = synapse_read_mpmc_queue
+                    (pThread->hnd_thread_queue);
         
-        if(pThread->hnd_thread_execution_event)
-            pThread->ptr_thread_exec
-                (pThread->ptr_thread_exec_param);
-    }
+        if(!ptr_task) {
+            WaitForSingleObject
+                (pThread->hnd_thread_execution_event, INFINITE);
+            continue;
+        }
+        
+        if(!ptr_task->ptr_thread_task)
+            break;
+        
+        ptr_task->ptr_thread_task
+            (ptr_task->ptr_thread_task_parameter);
+        
+        synapse_system_deallocate
+            (ptr_task);
+    __synapse_execution_thread_loop_end
 }
 
 void
     __synapse_execution_thread_cleanup
         (__synapse_execution_thread* pThread)
 {
-    pThread->ptr_thread_exec
-        = NULL;
-    InterlockedExchange8
-        (pThread->flag_thread_execution,
-            __synapse_execution_thread_state_stopped);
+    __synapse_execution_thread_task
+        ptr_poison_pill
+            = { .ptr_thread_task = 0 };
     
+    synapse_write_mpmc_queue_until_success
+        (pThread->hnd_thread_queue, &ptr_poison_pill);
     SetEvent
         (pThread->hnd_thread_execution_event);
     WaitForSingleObject

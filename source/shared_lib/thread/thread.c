@@ -5,11 +5,19 @@
 
 synapse_thread
     synapse_initialize_thread
-        ()
+        (size_t pThreadQueueSize)
 {
     return
         synapse_execution_thread_initialize
-            ();
+            (pThreadQueueSize);
+}
+
+synapse_thread
+    synapse_initialize_thread_default
+        ()
+{
+    return
+        synapse_execution_thread_initialize_default();
 }
 
 void
@@ -21,8 +29,8 @@ void
 }
 
 void
-    synapse_dispatch_to_thread
-        (synapse_thread pThread, 
+    synapse_dispatch_task_to_thread
+        (synapse_thread pThread,
             void(*pThreadExec)(void*), void* pThreadParam)
 {
     synapse_execution_thread_dispatch

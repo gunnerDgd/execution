@@ -1,17 +1,20 @@
 #include <execution/thread/details/execution_thread_manip.h>
+#include <synapse/memory/memory.h>
 
 void
     __synapse_execution_thread_dispatch
         (__synapse_execution_thread* pThread,
                 void(*pThreadExec)(void*), void* pThreadParam)
 {
-    pThread->ptr_thread_exec
-        = pThreadExec;
-    pThread->ptr_thread_exec_param
-        = pThreadParam;
+    __synapse_execution_thread_task*
+        ptr_task
+            = synapse_system_allocate
+                    (sizeof(__synapse_execution_thread_task));
 
+    synapse_write_mpmc_queue_until_success
+        (pThread->hnd_thread_queue, ptr_task);
     SetEvent
-        (pThread->hnd_thread);
+        (pThread->hnd_thread_execution_event);
 }
 
 void

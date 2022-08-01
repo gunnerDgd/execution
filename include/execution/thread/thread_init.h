@@ -3,6 +3,10 @@
 
 synapse_execution_thread
     synapse_execution_thread_initialize
+        (size_t);
+
+synapse_execution_thread
+    synapse_execution_thread_initialize_default
         ();
 
 void
