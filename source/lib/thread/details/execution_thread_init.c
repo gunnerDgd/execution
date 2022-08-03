@@ -68,6 +68,10 @@ void
     WaitForSingleObject
         (pThread->hnd_thread, INFINITE);
     
+    CloseHandle
+        (pThread->hnd_thread_execution_event);
+    synapse_cleanup_mpmc_queue
+        (pThread->hnd_thread_queue);
     synapse_system_deallocate
         (pThread);
 }

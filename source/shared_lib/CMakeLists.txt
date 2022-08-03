@@ -67,4 +67,5 @@ target_link_libraries(
     synapse_networking_lib
     synapse_filesystem_lib
     synapse_memory_dll
+    synapse_structure_dll
 )

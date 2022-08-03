@@ -11,6 +11,11 @@ void
             = synapse_system_allocate
                     (sizeof(__synapse_execution_thread_task));
 
+    ptr_task->ptr_thread_task
+        = pThreadExec;
+    ptr_task->ptr_thread_task_parameter
+        = pThreadParam;
+
     synapse_write_mpmc_queue_until_success
         (pThread->hnd_thread_queue, ptr_task);
     SetEvent

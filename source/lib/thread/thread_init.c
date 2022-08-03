@@ -9,6 +9,9 @@ synapse_execution_thread
         (synapse_execution_thread, hnd_thread,
             __synapse_execution_thread_initialize
                 (pThreadQueueSize));
+    
+    return
+        hnd_thread;
 }
 
 synapse_execution_thread
